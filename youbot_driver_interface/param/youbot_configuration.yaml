@@ -1,0 +1,11 @@
+baseControlType:
+  baseVelocityControl: true
+  basePositionControl: false
+  baseJointVelocityControl: false
+  baseJointCurrentControl: false
+  baseJointToqueControl: false
+
+armControlType:
+  armJointPositionControl: true
+  armJointVelocityControl: false
+  armJointToqueControl: false
