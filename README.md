@@ -6,11 +6,11 @@
 
 ## Подготовка рабочего окружения
 
-Для работы вам потребуется компьютер под управлением операционной системой Ubuntu 16.04 и установленная операционная система для роботов ROS Kinetic Kame. Данная инструкция подойдет и к более старым версиям.
+Для работы вам потребуется компьютер под управлением операционной системой Ubuntu 20.04 и установленная операционная система для роботов ROS Kinetic Kame. Данная инструкция подойдет и к более старым версиям.
 
-[Инструкция по установке Ubuntu 16.04](https://losst.ru/ustanovka-ubuntu-16-04)
+[Инструкция по установке Ubuntu 16.04](https://losst.ru/ustanovka-ubuntu-20-04)
 
-[Инструкция по установке ROS](http://wiki.ros.org/kinetic/Installation/Ubuntu)
+[Инструкция по установке ROS](http://wiki.ros.org/noetic/Installation/Ubuntu)
 
 ## Полезные ссылки
 
@@ -21,12 +21,60 @@
 [Введение в ROS](https://github.com/shamoleg/course)
 
 
-## Установка драйвера
+## Установка
 
-Установите youbot_driver выполнив команду:
+Создайте рабочую область ROS или пропустите данный пункт если рабочая область существует:
 
 ```console
-sudo apt-get install ros-kinetic-youbot-driver
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/src/
+catkin_init_workspace
+cd ~/catkin_ws
+catkin_make
+```
+
+Для использования созданного окружения добавьте выполнение команды в файл .bashrc
+
+```console
+echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+```
+
+Установите git:
+
+```console
+sudo apt-get install git
+```
+
+Клонируйте данный репозиторий в папку рабочей области:
+
+```console
+cd ~/catkin_ws/src
+git clone https://github.com/shamoleg/youbot.git
+```
+
+Клонируйте данный репозитории субмодулей:
+
+```console
+cd ~/catkin_ws/src/youbot
+git submodule init
+git submodule update
+```
+
+Скачайте необходимые зависимости и соберите клонированные пакеты:
+
+```console
+cd ~/catkin_ws
+rosdep install --from-paths src --ignore-src -r -y
+```
+
+Перейдите в директорию с собранным youbot_driver_ros_interface и разрешите исполняемым файлам взаимодействовать с EtherCAT:
+
+```console
+cd ~/catkin_ws/devel/lib/youbot_driver_ros_interface/
+sudo setcap cap_net_raw+ep youbot_driver_ros_interface
+sudo setcap cap_net_raw+ep youbot_2nd_arm_test
+sudo setcap cap_net_raw+ep youbot_arm_test
 ```
 
 Установите утилиту ifconfig:
@@ -35,7 +83,7 @@ sudo apt-get install ros-kinetic-youbot-driver
 sudo apt-get install net-tools
 ```
 
-Узнайте название Ethernet интерфейса:
+Узнайте название Ethernet интерфейса запустив утилиту:
 
 ```console
 ifconfig
@@ -61,59 +109,6 @@ nano youbot-ethercat.cfg
 
 ![eth](./.img/eth.png)
 
-Создайте рабочую область ROS:
-
-```console
-mkdir -p ~/catkin_ws/src
-cd ~/catkin_ws/src/
-catkin_init_workspace
-cd ~/catkin_ws/
-catkin_make
-```
-
-Для использования созданного окружения добавьте выполнение команды в файл .bashrc
-
-```console
-echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
-source ~/.bashrc
-```
-
-Установите git:
-
-```console
-sudo apt-get install git
-```
-
-Установите необходимые зависимости для youbot_driver_ros_interface:
-
-```console
-sudo apt-get install ros-kinetic-brics-actuator
-sudo apt-get install ros-kinetic-pr2-controllers
-
-```
-
-Скачате youbot_driver_ros_interface:
-
-```console
-cd ~/catkin_ws/src/
-git clone https://github.com/youbot/youbot_driver_ros_interface.git
-```
-
-Соберите рабочую область:
-
-```console
-cd ~/catkin_ws/
-catkin_make
-```
-
-Перейдите в директорию с собранным youbot_driver_ros_interface и разрешите исполняемым файлам взаимодействовать с EtherCAT:
-
-```console
-cd ~/catkin_ws/devel/lib/youbot_driver_ros_interface/
-sudo setcap cap_net_raw+ep youbot_driver_ros_interface
-sudo setcap cap_net_raw+ep youbot_2nd_arm_test
-sudo setcap cap_net_raw+ep youbot_arm_test
-```
 
 Персональный компьютер готов к управлению мобильной платформой youbot
 
@@ -130,17 +125,17 @@ sudo setcap cap_net_raw+ep youbot_arm_test
 
 Запустите yзел управления на персональном компьютере:
 ```console
-roslaunch youbot_driver_ros_interface youbot_driver.launch
+roslaunch youbot_driver_interface youbot_driver.launch
 ```
 
 Запустите тест в новом окне терминала:
 ```console
-rosrun youbot_driver_ros_interface youbot_arm_test 
+rosrun youbot_driver_interface youbot_arm_test 
 ```
 
 Запустите управление передвижением:
 ```console
-rosrun youbot_driver_ros_interface youbot_keyboard_teleop.py
+rosrun youbot_driver_interface youbot_keyboard_teleop.py
 ```
 
 Для остановки работы узла в выбранном окне терминала нажмите сочетание клавиш  `Ctrl + C`
