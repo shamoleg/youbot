@@ -2,7 +2,7 @@
 
 В данном документе представлена инструкция по установке и настройке программного обеспечения для платформы KUKA youBot.
 
-![youbot](./images/youbot.jpg)
+![youbot](./.img/youbot.jpg)
 
 ## Подготовка рабочего окружения
 
@@ -43,7 +43,7 @@ ifconfig
 
 В приведенном на картинке примере названием является enp5s0:
 
-![ifconfig](./images/ifconfig.png)
+![ifconfig](./.img/ifconfig.png)
 
 Перейдите в директорию конфигурационных файлов youbot_driver/config:
 
@@ -59,7 +59,7 @@ nano youbot-ethercat.cfg
 
 Конфигурационный файл должен выглядеть как на приведенной картинке ниже
 
-![eth](./images/eth.png)
+![eth](./.img/eth.png)
 
 Создайте рабочую область ROS:
 
