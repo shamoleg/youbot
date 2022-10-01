@@ -14,3 +14,4 @@
 [submodule "youbot_simulation"]
 	path = youbot_simulation
 	url = https://github.com/mas-group/youbot_simulation
+	branch = noetic-devel
