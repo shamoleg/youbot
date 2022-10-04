@@ -66,13 +66,14 @@ git submodule update
 ```console
 cd ~/catkin_ws
 rosdep install --from-paths src --ignore-src -r -y
+catkin_make
 ```
 
-Перейдите в директорию с собранным youbot_driver_ros_interface и разрешите исполняемым файлам взаимодействовать с EtherCAT:
+Перейдите в директорию с собранным youbot_driver_interface и разрешите исполняемым файлам взаимодействовать с EtherCAT:
 
 ```console
-cd ~/catkin_ws/devel/lib/youbot_driver_ros_interface/
-sudo setcap cap_net_raw+ep youbot_driver_ros_interface
+cd ~/catkin_ws/devel/lib/youbot_driver_interface/
+sudo setcap cap_net_raw+ep youbot_driver_interface
 sudo setcap cap_net_raw+ep youbot_2nd_arm_test
 sudo setcap cap_net_raw+ep youbot_arm_test
 ```
@@ -123,9 +124,14 @@ nano youbot-ethercat.cfg
 
 Мобильная платформа включена и готова к работе.
 
+Обновите кэш разделяймых библиотек:
+```console
+ldconfig /opt/ros/noetic/lib/
+```
+
 Запустите yзел управления на персональном компьютере:
 ```console
-roslaunch youbot_driver_interface youbot_driver.launch
+roslaunch youbot_driver_interface youbot_driver_interface.launch
 ```
 
 Запустите тест в новом окне терминала:
