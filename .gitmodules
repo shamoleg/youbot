@@ -1,6 +1,3 @@
-[submodule "brics_actuator"]
-	path = brics_actuator
-	url = https://github.com/wnowak/brics_actuator
 [submodule "youbot_driver"]
 	path = youbot_driver
 	url = https://github.com/youbot/youbot_driver
@@ -8,10 +5,3 @@
 [submodule "youbot_driver_interface"]
 	path = youbot_driver_interface
 	url = https://github.com/shamoleg/youbot_driver_interface.git
-[submodule "youbot_description"]
-	path = youbot_description
-	url = https://github.com/shamoleg/youbot_description
-[submodule "youbot_simulation"]
-	path = youbot_simulation
-	url = https://github.com/mas-group/youbot_simulation
-	branch = noetic-devel
