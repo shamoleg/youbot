@@ -2,6 +2,3 @@
 	path = youbot_driver
 	url = https://github.com/youbot/youbot_driver
 	branch = hydro-devel
-[submodule "youbot_driver_interface"]
-	path = youbot_driver_interface
-	url = https://github.com/shamoleg/youbot_driver_interface.git
