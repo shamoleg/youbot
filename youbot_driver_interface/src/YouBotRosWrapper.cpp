@@ -1,9 +1,6 @@
 #include "YouBotRosWrapper.h"
 
 
-namespace youBot
-{
-
 DataBridgeRosToYouBotDriver::DataBridgeRosToYouBotDriver(std::string baseName, std::string configFilePath){
     try{
         youBotBase = new youbot::YouBotBase(baseName,configFilePath);
@@ -124,4 +121,3 @@ int main(int argc, char **argv){
         ros::spinOnce();
         rate.sleep();
     }
-}

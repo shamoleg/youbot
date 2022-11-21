@@ -18,8 +18,7 @@
 
 #define mkstr2(X) #X
 
-namespace youBot
-{
+
 
 class DataBridgeRosToYouBotDriver : public DataBridgeKinematicsBase, public DataBridgeJoint{   
 public:
@@ -41,4 +40,3 @@ protected:
 };
 
 
-}
