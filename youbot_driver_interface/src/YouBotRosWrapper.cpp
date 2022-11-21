@@ -1,25 +1,17 @@
 #include "YouBotRosWrapper.h"
 
 
-DataBridgeRosToYouBotDriver::DataBridgeRosToYouBotDriver(std::string baseName, std::string configFilePath){
-    try{
-        youBotBase = new youbot::YouBotBase(baseName,configFilePath);
-        youBotBase->doJointCommutation();
-        ROS_INFO("Base is initialized.");
-    }
-    catch (const std::exception& e){
-        const std::string errorMessage = e.what();
-        ROS_FATAL("%s", errorMessage.c_str());
-        ROS_ERROR("Base \"%s\" could not be initialized.", baseName.c_str());
-        return;
-    }
+BridgeRosToYouBotBase::BridgeRosToYouBotBase(youbot::YouBotBase* yb){
+    youBotBase =  yb;
 }
 
-void DataBridgeRosToYouBotDriver::setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition){
+
+void BridgeRosToYouBotBase::setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition){
 
 }
 
-void DataBridgeRosToYouBotDriver::setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity){
+
+void BridgeRosToYouBotBase::setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity){
     std::vector<youbot::JointVelocitySetpoint> jointVelocitySetpoint;
     jointVelocitySetpoint.clear();
 
@@ -30,18 +22,25 @@ void DataBridgeRosToYouBotDriver::setJointVelocity(const std_msgs::Float32MultiA
     youBotBase->setJointData(jointVelocitySetpoint);
 }
 
-void DataBridgeRosToYouBotDriver::setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque){
+
+void BridgeRosToYouBotBase::setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque){
 
 }
 
-void DataBridgeRosToYouBotDriver::getJointState(sensor_msgs::JointState& msgJointState){
+
+void BridgeRosToYouBotBase::getJointState(sensor_msgs::JointState& msgJointState){
     static std::vector<youbot::JointSensedAngle> jointAngle(4);
     static std::vector<youbot::JointSensedVelocity> jointVelocity(4);
     static std::vector<youbot::JointSensedTorque> jointTorque(4);
 
-    youBotBase->getJointData(jointAngle);
-    youBotBase->getJointData(jointTorque);
-    youBotBase->getJointData(jointVelocity);
+    this->youBotBase->getJointData(jointAngle);
+    this->youBotBase->getJointData(jointTorque);
+    this->youBotBase->getJointData(jointVelocity);
+
+    msgJointState.name = {"w1", "w2", "w3", "w4"};
+    msgJointState.position.resize(4);
+    msgJointState.velocity.resize(4);
+    msgJointState.effort.resize(4);
 
     for (int wheel = 0; wheel < 4; ++wheel){
         msgJointState.position[wheel] = jointAngle[wheel].angle.value();
@@ -52,7 +51,8 @@ void DataBridgeRosToYouBotDriver::getJointState(sensor_msgs::JointState& msgJoin
     msgJointState.position[2] = -msgJointState.position[2];
 }
 
-void DataBridgeRosToYouBotDriver::setBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity){
+
+void BridgeRosToYouBotBase::setBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity){
     const quantity<si::velocity> longitudinalVelocity = msgBaseVelocity.linear.x * meter_per_second;
     const quantity<si::velocity> transversalVelocity = msgBaseVelocity.linear.y * meter_per_second;
     const quantity<si::angular_velocity> angularVelocity = msgBaseVelocity.angular.z * radian_per_second;
@@ -60,11 +60,13 @@ void DataBridgeRosToYouBotDriver::setBaseVelocity(const geometry_msgs::Twist& ms
     youBotBase->setBaseVelocity(longitudinalVelocity, transversalVelocity, angularVelocity);
 }
 
-void DataBridgeRosToYouBotDriver::setBasePosition(const geometry_msgs::Pose& msgBasePosition){
+
+void BridgeRosToYouBotBase::setBasePosition(const geometry_msgs::Pose& msgBasePosition){
 
 }
 
-void DataBridgeRosToYouBotDriver::getBaseVelocity(geometry_msgs::Twist& msgBaseVelocity){
+
+void BridgeRosToYouBotBase::getBaseVelocity(geometry_msgs::Twist& msgBaseVelocity){
     static quantity<si::velocity> linearX;
     static quantity<si::velocity> linearY;
     static quantity<si::angular_velocity> angularZ;
@@ -76,7 +78,8 @@ void DataBridgeRosToYouBotDriver::getBaseVelocity(geometry_msgs::Twist& msgBaseV
     msgBaseVelocity.angular.z = angularZ.value();
 }
 
-void DataBridgeRosToYouBotDriver::getBasePosition(geometry_msgs::Pose& msgBasePosition) {
+
+void BridgeRosToYouBotBase::getBasePosition(geometry_msgs::Pose& msgBasePosition) {
     static quantity<si::length> positionX;
     static quantity<si::length> positionY;
     static quantity<plane_angle> orientationZ;
@@ -92,13 +95,28 @@ void DataBridgeRosToYouBotDriver::getBasePosition(geometry_msgs::Pose& msgBasePo
     msgBasePosition.orientation = tf2::toMsg(quaternionOdom);
 }
 
+
+YouBotRosBridge::YouBotRosBridge(const ros::NodeHandle& n){
+    this->connectEtherCAT();
+    try{
+        youBotBase = new youbot::YouBotBase("youbot-base", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
+        youBotBase->doJointCommutation();
+        ROS_INFO("Base is initialized.");
+    }
+    catch (const std::exception& e){
+        const std::string errorMessage = e.what();
+        ROS_FATAL("%s", errorMessage.c_str());
+        return;
+    }
+    d = new BridgeRosToYouBotBase(youBotBase);
+
+    baseKinematic = new WrapperKinematicsBase(n, (*d));
+    baseJoint = new WrapperJoint(n, (*d));
+
 }
 
 
-int main(int argc, char **argv){
-
-    ros::init(argc, argv, "youbot_driver");
-    ros::NodeHandle n;
+void YouBotRosBridge::connectEtherCAT(){
     try {
         youbot::EthercatMaster::getInstance("youbot-ethercat.cfg", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
         ROS_INFO("Ethercat initialize");
@@ -106,18 +124,32 @@ int main(int argc, char **argv){
         ROS_ERROR("No EtherCAT connection:");
         ROS_FATAL("%s", e.what());
     }
-    youBot::DataBridgeRosToYouBotDriver * d = new youBot::DataBridgeRosToYouBotDriver("youbot-base", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
-    WrapperKinematicsBase youBot(n, d);
+}
 
-    ros::AsyncSpinner spinner(1);
+
+void YouBotRosBridge::spin(){
+        baseKinematic->writeCmd(CONTROL_MODE::BASE_VELOCITY);
+        baseKinematic->readAndPub();
+
+        baseJoint->writeCmd(CONTROL_MODE::BASE_VELOCITY);
+        baseJoint->readAndPub();
+}
+
+
+int main(int argc, char **argv){
+
+    ros::init(argc, argv, "youbot_driver");
+    ros::NodeHandle n;
+    YouBotRosBridge yb(n);
+
+    ros::AsyncSpinner spinner(3);
     spinner.start();
-    ros::Rate rate(10);
-
+    ros::Rate rate(60);
 
     while(n.ok()){
-        youBot.trace();
-        youBot.writeCmd(CONTROL_MODE::BASE_VELOCITY);
-        youBot.readAndPub();
+
+        yb.spin();
         ros::spinOnce();
         rate.sleep();
     }
+}

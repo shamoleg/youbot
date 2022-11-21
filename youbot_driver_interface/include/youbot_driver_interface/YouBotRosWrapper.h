@@ -18,11 +18,9 @@
 
 #define mkstr2(X) #X
 
-
-
-class DataBridgeRosToYouBotDriver : public DataBridgeKinematicsBase, public DataBridgeJoint{   
+class BridgeRosToYouBotBase : public BridgeKinematicsBase, public BridgeJoint{   
 public:
-    DataBridgeRosToYouBotDriver(std::string baseName, std::string configFilePath);
+    BridgeRosToYouBotBase(youbot::YouBotBase* yb);
 
     void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) override;
     void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) override;
@@ -37,6 +35,30 @@ public:
 
 protected:
     youbot::YouBotBase* youBotBase;
+};
+
+class BridgeRosToYouBotArm : public BridgeJoint{
+    void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) override;
+    void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) override;
+    void setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque) override;
+    void getJointState(sensor_msgs::JointState& msgJointState) override;
+}
+
+class YouBotRosBridge{
+public:
+    YouBotRosBridge(const ros::NodeHandle& n);
+
+    void spin();
+
+private:
+    void connectEtherCAT();
+    BridgeRosToYouBotBase* d;
+
+
+    WrapperKinematicsBase* baseKinematic;
+    WrapperJoint* baseJoint;
+
+    youbot::YouBotBase* youBotBase; 
 };
 
 
