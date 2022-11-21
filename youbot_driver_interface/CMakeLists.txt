@@ -10,21 +10,7 @@ add_compile_options(-std=c++14)
 find_package(catkin REQUIRED COMPONENTS
 		ros_robot_wrapper
 		youbot_driver
-		roscpp
-		rosconsole
-		actionlib
-		tf
-		control_msgs
-		brics_actuator
-		pr2_msgs
-		diagnostic_msgs
-		geometry_msgs
-		nav_msgs
-		pr2_msgs
-		std_msgs
-		std_srvs
-		trajectory_msgs
-		controller_manager)
+		tf)
 
 find_package(Boost REQUIRED COMPONENTS thread date_time filesystem system )
 
@@ -156,10 +142,6 @@ add_executable(youbot_driver_interface
 		src/YouBotRosWrapper.cpp
         )
 
-add_executable(youbot_arm_test 
-    src/test.cpp 
-)
-target_link_libraries(youbot_arm_test ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${youbot_driver_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -178,7 +160,6 @@ target_link_libraries(${PROJECT_NAME}
 
 add_dependencies(youbot_driver_interface ${catkin_EXPORTED_TARGETS})
 
-add_dependencies(youbot_arm_test ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

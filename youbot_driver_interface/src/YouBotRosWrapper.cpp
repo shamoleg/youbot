@@ -100,28 +100,28 @@ void DataBridgeRosToYouBotDriver::getBasePosition(geometry_msgs::Pose& msgBasePo
 
 int main(int argc, char **argv){
 
-    // ros::init(argc, argv, "youbot_driver");
-    // ros::NodeHandle n;
-    // try {
-    //     youbot::EthercatMaster::getInstance("youbot-ethercat.cfg", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
-    //     ROS_INFO("Ethercat initialize");
-    // } catch (const std::exception& e){
-    //     ROS_ERROR("No EtherCAT connection:");
-    //     ROS_FATAL("%s", e.what());
-    // }
-    // youBot::DataBridgeRosToYouBotDriver * d = new youBot::DataBridgeRosToYouBotDriver("youbot-base", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
-    // WrapperKinematicsBase youBot(n, d, d);
+    ros::init(argc, argv, "youbot_driver");
+    ros::NodeHandle n;
+    try {
+        youbot::EthercatMaster::getInstance("youbot-ethercat.cfg", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
+        ROS_INFO("Ethercat initialize");
+    } catch (const std::exception& e){
+        ROS_ERROR("No EtherCAT connection:");
+        ROS_FATAL("%s", e.what());
+    }
+    youBot::DataBridgeRosToYouBotDriver * d = new youBot::DataBridgeRosToYouBotDriver("youbot-base", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
+    WrapperKinematicsBase youBot(n, d);
 
-    // ros::AsyncSpinner spinner(1);
-    // spinner.start();
-    // ros::Rate rate(10);
+    ros::AsyncSpinner spinner(1);
+    spinner.start();
+    ros::Rate rate(10);
 
 
-    // while(n.ok()){
-    //     youBot.trace();
-    //     youBot.writeCmd();
-    //     youBot.readAndPub();
-    //     ros::spinOnce();
-    //     rate.sleep();
-    // }
+    while(n.ok()){
+        youBot.trace();
+        youBot.writeCmd(CONTROL_MODE::BASE_VELOCITY);
+        youBot.readAndPub();
+        ros::spinOnce();
+        rate.sleep();
+    }
 }
