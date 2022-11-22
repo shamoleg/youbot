@@ -1,13 +1,69 @@
 #include "YouBotRosWrapper.h"
 
 
+BridgeRosToYouBotArm::BridgeRosToYouBotArm(youbot::YouBotManipulator* yb){
+    youBotArm =  yb;
+}
+
+
+void BridgeRosToYouBotArm::setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition){
+
+}
+
+
+void BridgeRosToYouBotArm::setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity){
+    std::vector<youbot::JointVelocitySetpoint> jointVelocitySetpoint;
+
+    for(float data : msgJointVelocity.data){
+        jointVelocitySetpoint.emplace_back(data * radian_per_second);
+    }
+    if (jointVelocitySetpoint.size() == 5){
+        youBotArm->setJointData(jointVelocitySetpoint);
+    }
+}
+
+
+void BridgeRosToYouBotArm::setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque){
+
+}
+
+
+void BridgeRosToYouBotArm::getJointState(sensor_msgs::JointState& msgJointState){
+    static std::vector<youbot::JointSensedAngle> jointAngle(5);
+    static std::vector<youbot::JointSensedVelocity> jointVelocity(5);
+    static std::vector<youbot::JointSensedTorque> jointTorque(5);
+
+    this->youBotArm->getJointData(jointAngle);
+    this->youBotArm->getJointData(jointTorque);
+    this->youBotArm->getJointData(jointVelocity);
+
+    msgJointState.name = {"w1", "w2", "w3", "w4", "w5"};
+    msgJointState.position.resize(5);
+    msgJointState.velocity.resize(5);
+    msgJointState.effort.resize(5);
+
+    for (int wheel = 0; wheel < 5; ++wheel){
+        msgJointState.position[wheel] = jointAngle[wheel].angle.value();
+        msgJointState.velocity[wheel] = jointVelocity[wheel].angularVelocity.value();
+        msgJointState.effort[wheel] = jointTorque[wheel].torque.value();
+    }
+}
+
+
+//----------------------------------------
 BridgeRosToYouBotBase::BridgeRosToYouBotBase(youbot::YouBotBase* yb){
     youBotBase =  yb;
 }
 
 
 void BridgeRosToYouBotBase::setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition){
+    std::vector<youbot::JointAngleSetpoint> jointPositionSetpoint;
 
+    for(float data : msgJointPosition.data){
+        jointPositionSetpoint.emplace_back(data * radian);
+    }
+
+    youBotBase->setJointData(jointPositionSetpoint);
 }
 
 
@@ -96,8 +152,8 @@ void BridgeRosToYouBotBase::getBasePosition(geometry_msgs::Pose& msgBasePosition
 }
 
 
-YouBotRosBridge::YouBotRosBridge(const ros::NodeHandle& n){
-    this->connectEtherCAT();
+YouBotRosBase::YouBotRosBase(const ros::NodeHandle& n):
+    node(n, "base"){
     try{
         youBotBase = new youbot::YouBotBase("youbot-base", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
         youBotBase->doJointCommutation();
@@ -108,39 +164,74 @@ YouBotRosBridge::YouBotRosBridge(const ros::NodeHandle& n){
         ROS_FATAL("%s", errorMessage.c_str());
         return;
     }
-    d = new BridgeRosToYouBotBase(youBotBase);
+    
+    bridgeBase = new BridgeRosToYouBotBase(youBotBase);
 
-    baseKinematic = new WrapperKinematicsBase(n, (*d));
-    baseJoint = new WrapperJoint(n, (*d));
-
+    
+    baseKinematic = new WrapperKinematicsBase(node, (*bridgeBase));
+    baseJoint = new WrapperJoint(node, (*bridgeBase));
 }
 
 
-void YouBotRosBridge::connectEtherCAT(){
-    try {
-        youbot::EthercatMaster::getInstance("youbot-ethercat.cfg", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
-        ROS_INFO("Ethercat initialize");
-    } catch (const std::exception& e){
-        ROS_ERROR("No EtherCAT connection:");
-        ROS_FATAL("%s", e.what());
-    }
-}
-
-
-void YouBotRosBridge::spin(){
+void YouBotRosBase::spin(){
+    try{
         baseKinematic->writeCmd(CONTROL_MODE::BASE_VELOCITY);
         baseKinematic->readAndPub();
 
         baseJoint->writeCmd(CONTROL_MODE::BASE_VELOCITY);
         baseJoint->readAndPub();
+
+    } catch (const std::exception& e){
+        ROS_ERROR("Bad message:");
+        ROS_ERROR("%s", e.what());
+    }   
 }
 
 
-int main(int argc, char **argv){
+YouBotRosArm::YouBotRosArm(const ros::NodeHandle& n):
+    node(n, "arm"){
+    try{
+        youBotArm = new youbot::YouBotManipulator("youbot-manipulator", "/home/sham/catkin_ws/src/youbot/youbot_driver/config");
+        youBotArm->doJointCommutation();
+        ROS_INFO("Arm1 is initialized.");
+    }
+    catch (const std::exception& e){
+        const std::string errorMessage = e.what();
+        ROS_FATAL("%s", errorMessage.c_str());
+        return;
+    }
+    bridgeArm = new BridgeRosToYouBotArm(youBotArm);
+    armJoint = new WrapperJoint(node, (*bridgeArm));
+}
 
+
+void YouBotRosArm::spin(){
+    try{
+        armJoint->writeCmd(CONTROL_MODE::BASE_VELOCITY);
+        armJoint->readAndPub();
+
+    } catch (const std::exception& e){
+        ROS_ERROR("Bad message:");
+        ROS_ERROR("%s", e.what());
+    }   
+}
+
+
+YouBotRos::YouBotRos(const ros::NodeHandle& n):
+    base(n), arm1(n){
+}
+
+
+void YouBotRos::spin(){
+    base.spin();
+    arm1.spin();
+}
+    
+
+int main(int argc, char **argv){
     ros::init(argc, argv, "youbot_driver");
     ros::NodeHandle n;
-    YouBotRosBridge yb(n);
+    YouBotRos yb(n);
 
     ros::AsyncSpinner spinner(3);
     spinner.start();

@@ -38,27 +38,63 @@ protected:
 };
 
 class BridgeRosToYouBotArm : public BridgeJoint{
+public:
+    BridgeRosToYouBotArm(youbot::YouBotManipulator* youBotArm);
+
     void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) override;
     void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) override;
     void setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque) override;
     void getJointState(sensor_msgs::JointState& msgJointState) override;
-}
 
-class YouBotRosBridge{
+protected:
+    youbot::YouBotManipulator* youBotArm;
+};
+
+
+class YouBotRosBase{
 public:
-    YouBotRosBridge(const ros::NodeHandle& n);
-
+    YouBotRosBase(const ros::NodeHandle& n);
     void spin();
 
 private:
-    void connectEtherCAT();
-    BridgeRosToYouBotBase* d;
+    ros::NodeHandle node;
 
+    BridgeRosToYouBotBase* bridgeBase;
 
-    WrapperKinematicsBase* baseKinematic;
     WrapperJoint* baseJoint;
+    WrapperKinematicsBase* baseKinematic;
 
-    youbot::YouBotBase* youBotBase; 
+    youbot::YouBotBase* youBotBase;
 };
+
+
+class YouBotRosArm{
+public:
+    YouBotRosArm(const ros::NodeHandle& n);
+    void spin();
+
+private:
+    ros::NodeHandle node;
+
+    BridgeRosToYouBotArm* bridgeArm;
+
+    WrapperJoint* armJoint;
+
+    youbot::YouBotManipulator* youBotArm;
+};
+
+
+class YouBotRos{
+public:
+    YouBotRos(const ros::NodeHandle& n);
+    YouBotRosBase base;
+    YouBotRosArm arm1;
+    // YouBotArm arm2;
+    ros::NodeHandle n;
+
+    void spin();
+};
+
+
 
 
