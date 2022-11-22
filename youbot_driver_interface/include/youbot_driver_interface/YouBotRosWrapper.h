@@ -18,6 +18,34 @@
 
 #define mkstr2(X) #X
 
+
+class YouBotConfiguration {
+public:
+    YouBotConfiguration(ros::NodeHandle n);
+
+    int driverCycleFrequencyInHz;
+    std::string configFilePath;
+
+    int numOfWheels;
+    std::string baseName;
+    std::map<std::string, bool> baseControlType;
+
+    int numOfJoints;
+    int numOfGripper;
+    std::string armName;
+    std::map<std::string, bool> armControlType;
+
+    std::vector<std::string> name_wheels;
+    std::vector<std::string> name_jointsArm;
+    std::vector<std::string> name_gripperFinger;
+
+    std::string name_odomFrame;
+    std::string name_odomChildFrame;
+private:
+    ros::NodeHandle node;
+};
+
+
 class BridgeRosToYouBotBase : public BridgeKinematicsBase, public BridgeJoint{   
 public:
     BridgeRosToYouBotBase(youbot::YouBotBase* yb);
