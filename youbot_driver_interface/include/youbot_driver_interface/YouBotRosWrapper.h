@@ -19,9 +19,9 @@
 #define mkstr2(X) #X
 
 
-class YouBotConfiguration {
+class YouBotRosConfiguration {
 public:
-    YouBotConfiguration(ros::NodeHandle n);
+    YouBotRosConfiguration(ros::NodeHandle n);
 
     int driverCycleFrequencyInHz;
     std::string configFilePath;
@@ -30,7 +30,7 @@ public:
     std::string baseName;
     std::map<std::string, bool> baseControlType;
 
-    int numOfJoints;
+    int numOfJoint;
     int numOfGripper;
     std::string armName;
     std::map<std::string, bool> armControlType;
@@ -48,7 +48,7 @@ private:
 
 class BridgeRosToYouBotBase : public BridgeKinematicsBase, public BridgeJoint{   
 public:
-    BridgeRosToYouBotBase(youbot::YouBotBase* yb);
+    BridgeRosToYouBotBase(youbot::YouBotBase* yb, YouBotRosConfiguration& config);
 
     void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) override;
     void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) override;
@@ -62,12 +62,13 @@ public:
     void getBasePosition(geometry_msgs::Pose& msgBasePosition) override;
 
 protected:
+    YouBotRosConfiguration& config;
     youbot::YouBotBase* youBotBase;
 };
 
 class BridgeRosToYouBotArm : public BridgeJoint{
 public:
-    BridgeRosToYouBotArm(youbot::YouBotManipulator* youBotArm);
+    BridgeRosToYouBotArm(youbot::YouBotManipulator* youBotArm, YouBotRosConfiguration& config);
 
     void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) override;
     void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) override;
@@ -75,17 +76,19 @@ public:
     void getJointState(sensor_msgs::JointState& msgJointState) override;
 
 protected:
+    YouBotRosConfiguration& config;
     youbot::YouBotManipulator* youBotArm;
 };
 
 
 class YouBotRosBase{
 public:
-    YouBotRosBase(const ros::NodeHandle& n);
+    YouBotRosBase(const ros::NodeHandle& n, YouBotRosConfiguration& config);
     void spin();
 
 private:
     ros::NodeHandle node;
+    YouBotRosConfiguration& config;
 
     BridgeRosToYouBotBase* bridgeBase;
 
@@ -98,11 +101,12 @@ private:
 
 class YouBotRosArm{
 public:
-    YouBotRosArm(const ros::NodeHandle& n);
+    YouBotRosArm(const ros::NodeHandle& n, YouBotRosConfiguration& config);
     void spin();
 
 private:
     ros::NodeHandle node;
+    YouBotRosConfiguration& config;
 
     BridgeRosToYouBotArm* bridgeArm;
 
@@ -115,6 +119,7 @@ private:
 class YouBotRos{
 public:
     YouBotRos(const ros::NodeHandle& n);
+    YouBotRosConfiguration config;    
     YouBotRosBase base;
     YouBotRosArm arm1;
     // YouBotArm arm2;
