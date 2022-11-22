@@ -19,10 +19,9 @@
 
 	<param name="robot_description" command="$(find xacro)/xacro $(find youbot_description)/robots/youbot_tpu_real.urdf.xacro" />
 
-	<param name="ignote_timestamp" value="true"/>
-
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
 		<remap from="joint_states" to="arm/joint_states" />
+		<param name="ignore_timestamp" value="true"/>
 	</node>
 
 </launch>

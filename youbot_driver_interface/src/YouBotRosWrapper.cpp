@@ -203,7 +203,7 @@ YouBotRosBase::YouBotRosBase(const ros::NodeHandle& n, YouBotRosConfiguration& c
     
     this->baseKinematic = new WrapperKinematicsBase(this->node, (*bridgeBase));
     this->baseKinematic->setOdomFrame(this->config.name_odomFrame, this->config.name_odomChildFrame);
-    
+
     this->baseJoint = new WrapperJoint(this->node, (*bridgeBase));
     this->baseJoint->setNumOfJoint(this->config.numOfJoint);
 }
@@ -274,10 +274,8 @@ int main(int argc, char **argv){
 
     ros::AsyncSpinner spinner(3);
     spinner.start();
-    ros::Rate rate(60);
-
+    ros::Rate rate(200);
     while(n.ok()){
-
         yb.spin();
         ros::spinOnce();
         rate.sleep();
