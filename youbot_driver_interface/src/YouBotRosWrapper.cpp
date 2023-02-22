@@ -51,10 +51,11 @@ void BridgeRosToYouBotArm::setJointPosition(const std_msgs::Float32MultiArray& m
 
 void BridgeRosToYouBotArm::setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity){
     std::vector<youbot::JointVelocitySetpoint> jointVelocitySetpoint;
-
+    std::cout << "setJointVelocity" << std::endl; 
     for(float data : msgJointVelocity.data){
         jointVelocitySetpoint.emplace_back(data * radian_per_second);
     }
+  
     youBotArm->setJointData(jointVelocitySetpoint);
 }
 
@@ -73,7 +74,7 @@ void BridgeRosToYouBotArm::getJointState(sensor_msgs::JointState& msgJointState)
     this->youBotArm->getJointData(jointTorque);
     this->youBotArm->getJointData(jointVelocity);
 
-    msgJointState.name = this->config.name_jointsArm;
+    msgJointState.name = this->config.name_wheels;
     msgJointState.position.resize(this->config.numOfJoint);
     msgJointState.velocity.resize(this->config.numOfJoint);
     msgJointState.effort.resize(this->config.numOfJoint);
@@ -98,7 +99,10 @@ void BridgeRosToYouBotBase::setJointPosition(const std_msgs::Float32MultiArray& 
 
     for(float data : msgJointPosition.data){
         jointPositionSetpoint.emplace_back(data * radian);
-    }
+    }.
+
+
+    
 
     this->youBotBase->setJointData(jointPositionSetpoint);
 }
@@ -108,25 +112,41 @@ void BridgeRosToYouBotBase::setJointVelocity(const std_msgs::Float32MultiArray& 
     std::vector<youbot::JointVelocitySetpoint> jointVelocitySetpoint;
 
     for(float data : msgJointVelocity.data){
-        jointVelocitySetpoint.emplace_back(data * radian_per_second);
+    jointVelocitySetpoint.emplace_back(data * radian_per_second);
+    }
+      if(jointVelocitySetpoint.size() != 4 ){
+        return;
     }
 
     this->youBotBase->setJointData(jointVelocitySetpoint);
 }
 
-
 void BridgeRosToYouBotBase::setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque){
+}
 
+void BridgeRosToYouBotBase::setJointCurrent(const std_msgs::Float32MultiArray& msgJointTorque){
+    std::vector<youbot::JointCurrentSetpoint> jointCurrentSetpoint;
+    jointCurrentSetpoint.resize(4);
+    if(msgJointTorque.data.size() != 4){
+        std::cout << "msgJointTorque.size() != 4";
+        return;
+    }
+    for(int i = 0; i < jointCurrentSetpoint.size(); ++i){
+        jointCurrentSetpoint[i].current = msgJointTorque.data[i] * ampere;
+    }
+
+    this->youBotBase->setJointData(jointCurrentSetpoint);
 }
 
 
 void BridgeRosToYouBotBase::getJointState(sensor_msgs::JointState& msgJointState){
     static std::vector<youbot::JointSensedAngle> jointAngle(config.numOfWheels);
     static std::vector<youbot::JointSensedVelocity> jointVelocity(config.numOfWheels);
-    static std::vector<youbot::JointSensedTorque> jointTorque(config.numOfWheels);
+    // static std::vector<youbot::JointSensedTorque> jointTorque(config.numOfWheels);
+    static std::vector<youbot::JointSensedCurrent> jointCurrent(config.numOfWheels);
 
     this->youBotBase->getJointData(jointAngle);
-    this->youBotBase->getJointData(jointTorque);
+    this->youBotBase->getJointData(jointCurrent);
     this->youBotBase->getJointData(jointVelocity);
 
     msgJointState.name = config.name_jointsArm;
@@ -137,8 +157,10 @@ void BridgeRosToYouBotBase::getJointState(sensor_msgs::JointState& msgJointState
     for (int wheel = 0; wheel < config.numOfWheels; ++wheel){
         msgJointState.position[wheel] = jointAngle[wheel].angle.value();
         msgJointState.velocity[wheel] = jointVelocity[wheel].angularVelocity.value();
-        msgJointState.effort[wheel] = jointTorque[wheel].torque.value();
+        msgJointState.effort[wheel] = jointCurrent[wheel].current.value();
+
     }
+    
     msgJointState.position[0] = -msgJointState.position[0];
     msgJointState.position[2] = -msgJointState.position[2];
 }
@@ -211,10 +233,10 @@ YouBotRosBase::YouBotRosBase(const ros::NodeHandle& n, YouBotRosConfiguration& c
 
 void YouBotRosBase::spin(){
     try{
-        this->baseKinematic->writeCmd(CONTROL_MODE::BASE_VELOCITY);
-        this->baseKinematic->readAndPub();
+        // this->baseKinematic->writeCmd(CONTROL_MODE::BASE_VELOCITY);
+        // this->baseKinematic->readAndPub();
 
-        this->baseJoint->writeCmd(CONTROL_MODE::BASE_VELOCITY);
+        this->baseJoint->writeCmd(CONTROL_MODE::JOINT_VELOCITY);
         this->baseJoint->readAndPub();
 
     } catch (const std::exception& e){
@@ -237,10 +259,10 @@ YouBotRosArm::YouBotRosArm(const ros::NodeHandle& n, YouBotRosConfiguration& con
         ROS_FATAL("%s", errorMessage.c_str());
         return;
     }
-    bridgeArm = new BridgeRosToYouBotArm(youBotArm, config);
+    // bridgeArm = new BridgeRosToYouBotArm(youBotArm, config);
 
-    this->armJoint = new WrapperJoint(this->node, (*this->bridgeArm));
-    this->armJoint->setNumOfJoint(this->config.numOfJoint);
+    // this->armJoint = new WrapperJoint(this->node, (*this->bridgeArm));
+    // this->armJoint->setNumOfJoint(this->config.numOfJoint);
 }
 
 
@@ -257,13 +279,12 @@ void YouBotRosArm::spin(){
 
 
 YouBotRos::YouBotRos(const ros::NodeHandle& n):
-    config(n), base(n, config), arm1(n, config) {
+    config(n), base(n, config) {
 }
 
 
 void YouBotRos::spin(){
     this->base.spin();
-    this->arm1.spin();
 }
     
 
