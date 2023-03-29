@@ -209,6 +209,8 @@ YouBotRosBase::YouBotRosBase(const ros::NodeHandle& n, YouBotRosConfiguration& c
 }
 
 
+
+
 void YouBotRosBase::spin(){
     try{
         this->baseKinematic->writeCmd(CONTROL_MODE::BASE_VELOCITY);
