@@ -53,6 +53,7 @@ public:
     void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) override;
     void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) override;
     void setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque) override;
+    void setJointCurrent(const std_msgs::Float32MultiArray& msgJointTorque) override;
     void getJointState(sensor_msgs::JointState& msgJointState) override;
 
     void setBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity) override;
@@ -121,7 +122,7 @@ public:
     YouBotRos(const ros::NodeHandle& n);
     YouBotRosConfiguration config;    
     YouBotRosBase base;
-    YouBotRosArm arm1;
+    // YouBotRosArm arm1;
     // YouBotArm arm2;
     ros::NodeHandle n;
 
