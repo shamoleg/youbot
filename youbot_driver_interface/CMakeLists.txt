@@ -6,6 +6,7 @@ add_compile_options(-std=c++14)
 find_package(catkin REQUIRED COMPONENTS
 		ros_robot_wrapper
 		youbot_driver
+		controller_manager
 		tf)
 
 find_package(Boost REQUIRED COMPONENTS thread date_time filesystem system )
@@ -26,19 +27,27 @@ catkin_package(
   roscpp
 )
 
-add_executable(youbot_driver_interface 
-		src/YouBotRosWrapper.cpp )
+add_executable(youbot_driver_interface
+				src/YouBotHW.cpp
+				src/yuobot_hw_node.cpp)
+
 add_dependencies(youbot_driver_interface ${catkin_EXPORTED_TARGETS})
 
-add_executable(yuobot_hw_node
-		src/YouBotHW.cpp
-		src/yuobot_hw_node.cpp)
-
-
 target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-)
+		${catkin_LIBRARIES}
+		${Boost_LIBRARIES}
+		)
+
+#add_executable(yuobot_hw_node
+#		src/YouBotHW.cpp
+#		src/yuobot_hw_node.cpp)
+#add_dependencies(yuobot_hw_node ${catkin_EXPORTED_TARGETS})
+#
+#target_link_libraries(yuobot_hw_node
+#		${catkin_LIBRARIES}
+#		${Boost_LIBRARIES}
+#		)
+
 
 install(DIRECTORY launch/
 	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch

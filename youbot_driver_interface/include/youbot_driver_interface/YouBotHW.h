@@ -16,29 +16,39 @@
 
 #include "ros/ros.h"
 
+#include "std_msgs/Float32MultiArray.h"
+
+#include <boost/assign.hpp>
+
 namespace yb {
 
 struct Joint {
+    std::string name;
     double position = 0;
     double velocity = 0;
-    double torque = 0;
     double effort = 0;
+    double absolute_position = 0;
+    double torque_sensor = 0;
 };
 
 class YouBotHW : public hardware_interface::RobotHW {
 public:
-    YouBotHW();
+    virtual bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
 
+    YouBotHW(ros::NodeHandle& nh);
     void readFromJoint();
     void writeToJoint();
 
 private:
-    hardware_interface::JointStateInterface jointStateInterface;
-    hardware_interface::VelocityJointInterface velocityJointInterface;
+    ros::NodeHandle nh;
 
+    hardware_interface::JointStateInterface joint_state_interface;
+    hardware_interface::VelocityJointInterface velocity_joint_interface;
+    double joint_velocity_command[4] = {0,0,0,0};
     yb::Joint joints[4];
 
-    boost::mutex mutexCb;
+
+//    boost::mutex mutexCb;
 };
 
 }

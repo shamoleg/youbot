@@ -1,0 +1,18 @@
+hardware_control_loop:
+  loop_hz: &loop_hz 125
+
+base_hardware_interface:
+  joints: &base_joints
+    - wheel_joint_fl
+    - wheel_joint_fr
+    - wheel_joint_bl
+    - wheel_joint_br
+
+# Publish all joint states ----------------------------------
+joint_state_controller:
+  type:         joint_state_controller/JointStateController
+  publish_rate: *loop_hz
+
+joint_group_vel_controller:
+  type: velocity_controllers/JointGroupVelocityController
+  joints: *base_joints
