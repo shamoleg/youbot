@@ -13,6 +13,14 @@ joint_state_controller:
   type:         joint_state_controller/JointStateController
   publish_rate: *loop_hz
 
+joint_group_effort_controller:
+  type: effort_controllers/JointGroupEffortController
+  joints: *base_joints
+
 joint_group_vel_controller:
   type: velocity_controllers/JointGroupVelocityController
+  joints: *base_joints
+
+joint_group_pos_controller:
+  type: position_controllers/JointGroupPositionController
   joints: *base_joints

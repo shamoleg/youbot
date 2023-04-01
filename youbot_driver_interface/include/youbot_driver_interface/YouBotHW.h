@@ -7,6 +7,8 @@
 
 #include "boost/thread.hpp"
 
+#include "youbot_driver/youbot/YouBotBase.hpp"
+
 #include "hardware_interface/joint_state_interface.h"
 #include "hardware_interface/joint_command_interface.h"
 #include "hardware_interface/robot_hw.h"
@@ -20,35 +22,51 @@
 
 #include <boost/assign.hpp>
 
+#pragma  ones
+
 namespace yb {
 
-struct Joint {
+struct Joint{
+    Joint();
     std::string name;
-    double position = 0;
-    double velocity = 0;
-    double effort = 0;
-    double absolute_position = 0;
-    double torque_sensor = 0;
+    double position;
+    double velocity;
+    double effort;
+    double torque;
+    double absolute_position;
 };
 
 class YouBotHW : public hardware_interface::RobotHW {
 public:
-    virtual bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
+    YouBotHW(std::vector<std::string> joint_names);
 
-    YouBotHW(ros::NodeHandle& nh);
-    void readFromJoint();
-    void writeToJoint();
+    bool init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh) override;
+
+    void read(const ros::Time& time, const ros::Duration& period) override;
+
+    void write(const ros::Time& time, const ros::Duration& period) override;
+
+    bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                       const std::list<hardware_interface::ControllerInfo>& stop_list) override;
+
+    void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                  const std::list<hardware_interface::ControllerInfo>& stop_list) override;
+
 
 private:
     ros::NodeHandle nh;
+//    youbot::YouBotBase youBotBaseHardware;
 
-    hardware_interface::JointStateInterface joint_state_interface;
-    hardware_interface::VelocityJointInterface velocity_joint_interface;
-    double joint_velocity_command[4] = {0,0,0,0};
-    yb::Joint joints[4];
+    std::map<std::string, bool> hi_switcher;
+
+    hardware_interface::JointStateInterface hij_state_;
+    hardware_interface::EffortJointInterface hij_effort_;
+    hardware_interface::VelocityJointInterface hij_velocity_;
+    hardware_interface::PositionJointInterface hij_position_;
 
 
-//    boost::mutex mutexCb;
+    std::vector<Joint> joints_sensed_;
+    std::vector<Joint> joints_cmd_;
 };
 
 }
