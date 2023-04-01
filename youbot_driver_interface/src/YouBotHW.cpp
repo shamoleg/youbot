@@ -37,7 +37,7 @@ void print_joints(std::vector<yb::Joint> joints){
 
 
 yb::YouBotHW::YouBotHW(std::vector<std::string> joint_names) :
-//        youBotBaseHardware("youbot-base"),
+        youBotBaseHardware("youbot-base", "~/catkin_ws/src/youbot/youbot_driver/config"),
         joints_sensed_(gen_joints(joint_names)),
         joints_cmd_(gen_joints(joint_names))
 {
@@ -71,6 +71,7 @@ bool yb::YouBotHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
                                                 &joints_cmd_[i].position));
 
     }
+
     this->registerInterface(&hij_state_);
     this->registerInterface(&hij_effort_);
     this->registerInterface(&hij_velocity_);
@@ -80,14 +81,30 @@ bool yb::YouBotHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
         hi_switcher[interface_name] = false;
     }
 
-
     return true;
 }
 
 void yb::YouBotHW::read(const ros::Time &time, const ros::Duration &period) {
-//    std::cout << " read " << std::endl;
-//    print_joints(joints_cmd_);
-    RobotHW::read(time, period);
+    std::vector<youbot::JointSensedAngle> jointSensedAngle(BASEJOINTS);
+    youBotBaseHardware.getJointData(jointSensedAngle);
+
+    std::vector<youbot::JointSensedVelocity> jointSensedVelocity(BASEJOINTS);
+    youBotBaseHardware.getJointData(jointSensedVelocity);
+
+    std::vector<youbot::JointSensedCurrent> jointSensedCurrent(BASEJOINTS);
+    youBotBaseHardware.getJointData(jointSensedCurrent);
+
+    std::vector<youbot::JointSensedTorque> jointSensedTorque(BASEJOINTS);
+    youBotBaseHardware.getJointData(jointSensedTorque);
+
+
+    for(int i = 0; i < BASEJOINTS; ++i){
+        joints_sensed_[i].position = jointSensedAngle[i].angle.value();
+        joints_sensed_[i].velocity = jointSensedVelocity[i].angularVelocity.value();
+        joints_sensed_[i].effort = jointSensedCurrent[i].current.value();
+        joints_sensed_[i].torque = jointSensedTorque[i].torque.value();
+    }
+
 }
 
 

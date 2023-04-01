@@ -55,7 +55,7 @@ public:
 
 private:
     ros::NodeHandle nh;
-//    youbot::YouBotBase youBotBaseHardware;
+    youbot::YouBotBase youBotBaseHardware;
 
     std::map<std::string, bool> hi_switcher;
 
