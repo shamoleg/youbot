@@ -24,7 +24,11 @@
 
 #pragma  ones
 
+using InterfaceSwitcher = std::map<std::string, bool>;
+
 namespace yb {
+
+
 
 struct Joint{
     Joint();
@@ -55,15 +59,14 @@ public:
 
 private:
     ros::NodeHandle nh;
-    youbot::YouBotBase youBotBaseHardware;
+//    youbot::YouBotBase youBotBaseHardware;
 
-    std::map<std::string, bool> hi_switcher;
+    InterfaceSwitcher interface_switcher;
 
     hardware_interface::JointStateInterface hij_state_;
     hardware_interface::EffortJointInterface hij_effort_;
     hardware_interface::VelocityJointInterface hij_velocity_;
     hardware_interface::PositionJointInterface hij_position_;
-
 
     std::vector<Joint> joints_sensed_;
     std::vector<Joint> joints_cmd_;

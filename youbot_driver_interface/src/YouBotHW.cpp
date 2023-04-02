@@ -35,9 +35,15 @@ void print_joints(std::vector<yb::Joint> joints){
     }
 }
 
+void print_interface_switcher(InterfaceSwitcher i_switcher){
+    for(const auto& i : i_switcher){
+        std::cout << i.first << ": " << i.second << std::endl;
+    }
+}
+
 
 yb::YouBotHW::YouBotHW(std::vector<std::string> joint_names) :
-        youBotBaseHardware("youbot-base", "~/catkin_ws/src/youbot/youbot_driver/config"),
+//        youBotBaseHardware("youbot-base", "~/catkin_ws/src/youbot/youbot_driver/config"),
         joints_sensed_(gen_joints(joint_names)),
         joints_cmd_(gen_joints(joint_names))
 {
@@ -78,33 +84,34 @@ bool yb::YouBotHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
     this->registerInterface(&hij_position_);
 
     for(const auto& interface_name : this->getNames()){
-        hi_switcher[interface_name] = false;
+        interface_switcher[interface_name] = false;
     }
-
+    print_interface_switcher(interface_switcher);
+    std::cout << interface_switcher.count("hardware_interface::JointStateInterface")  << std::endl;
+    std::cout << interface_switcher.count("ji") << std::endl;
     return true;
 }
 
 void yb::YouBotHW::read(const ros::Time &time, const ros::Duration &period) {
-    std::vector<youbot::JointSensedAngle> jointSensedAngle(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedAngle);
-
-    std::vector<youbot::JointSensedVelocity> jointSensedVelocity(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedVelocity);
-
-    std::vector<youbot::JointSensedCurrent> jointSensedCurrent(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedCurrent);
-
-    std::vector<youbot::JointSensedTorque> jointSensedTorque(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedTorque);
-
-
-    for(int i = 0; i < BASEJOINTS; ++i){
-        joints_sensed_[i].position = jointSensedAngle[i].angle.value();
-        joints_sensed_[i].velocity = jointSensedVelocity[i].angularVelocity.value();
-        joints_sensed_[i].effort = jointSensedCurrent[i].current.value();
-        joints_sensed_[i].torque = jointSensedTorque[i].torque.value();
-    }
-
+//    std::vector<youbot::JointSensedAngle> jointSensedAngle(BASEJOINTS);
+//    youBotBaseHardware.getJointData(jointSensedAngle);
+//
+//    std::vector<youbot::JointSensedVelocity> jointSensedVelocity(BASEJOINTS);
+//    youBotBaseHardware.getJointData(jointSensedVelocity);
+//
+//    std::vector<youbot::JointSensedCurrent> jointSensedCurrent(BASEJOINTS);
+//    youBotBaseHardware.getJointData(jointSensedCurrent);
+//
+//    std::vector<youbot::JointSensedTorque> jointSensedTorque(BASEJOINTS);
+//    youBotBaseHardware.getJointData(jointSensedTorque);
+//
+//
+//    for(int i = 0; i < BASEJOINTS; ++i){
+//        joints_sensed_[i].position = jointSensedAngle[i].angle.value();
+//        joints_sensed_[i].velocity = jointSensedVelocity[i].angularVelocity.value();
+//        joints_sensed_[i].effort = jointSensedCurrent[i].current.value();
+//        joints_sensed_[i].torque = jointSensedTorque[i].torque.value();
+//    }
 }
 
 
@@ -123,18 +130,33 @@ bool yb::YouBotHW::prepareSwitch(const std::list<hardware_interface::ControllerI
 
 void yb::YouBotHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start_list,
                             const std::list<hardware_interface::ControllerInfo> &stop_list) {
-    std::cout << " doSwitch " << std::endl;
+
     for (auto& controller_it : stop_list){
-        std::cout << "1 " << controller_it.name;
-        std::cout << "2 " << controller_it.type;
-        for (auto& resource_it : controller_it.claimed_resources) {
-            std::cout << "hhh " << resource_it.hardware_interface << " ";
-            for (auto& s : resource_it.resources)
-                std::cout << "s " << s << " ";
+        for(auto &resource : controller_it.claimed_resources){
+            if(this->interface_switcher.count(resource.hardware_interface)){
+                interface_switcher[resource.hardware_interface] = false;
+            }
         }
-        std::cout << std::endl << "---------------" << std::endl;
     }
-    std::cout << std::endl;
+
+    for (auto& controller_it : start_list){
+        for(auto &resource : controller_it.claimed_resources){
+            if(this->interface_switcher.count(resource.hardware_interface)){
+                interface_switcher[resource.hardware_interface] = true;
+            }
+        }
+    }
+
+    // TODO delete this
+    print_interface_switcher(this->interface_switcher);
+    for (auto& controller_it : start_list){
+        std::cout << controller_it.name << ": " << controller_it.type << std::endl;
+        for(auto &c : controller_it.claimed_resources){
+            std::cout << c.hardware_interface << std::endl;
+        }
+        std::cout << "----------------------" << std::endl;
+    }
+
 }
 
 
