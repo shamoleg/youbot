@@ -39,5 +39,8 @@
     <node name="ros_control_stopped_spawner" pkg="controller_manager" type="spawner"
           args="--stopped $(arg stopped_controllers)" output="screen" respawn="false" />
 
+    <node name="youbot_driver" pkg="youbot_driver_interface" type="youbot_driver_interface" output="screen"/>
+
+
 
 </launch>

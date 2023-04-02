@@ -40,7 +40,7 @@ int main(int argc, char* argv[]){
     controller_manager::ControllerManager cm(&yb, nh);
     yb.init(nh, nh_priv);
 
-    boost::thread(boost::bind(treadController, &yb, &cm, ros::Rate(2)));
+    boost::thread(boost::bind(treadController, &yb, &cm, ros::Rate(60)));
 
     ros::spin();
     return 0;

@@ -59,7 +59,7 @@ public:
 
 private:
     ros::NodeHandle nh;
-//    youbot::YouBotBase youBotBaseHardware;
+    youbot::YouBotBase youBotBaseHardware;
 
     InterfaceSwitcher interface_switcher;
 
