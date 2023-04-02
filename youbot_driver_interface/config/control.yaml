@@ -10,7 +10,7 @@ base_hardware_interface:
 
 # Publish all joint states ----------------------------------
 joint_state_controller:
-  type:         joint_state_controller/JointStateController
+  type: joint_state_controller/JointStateController
   publish_rate: *loop_hz
 
 joint_group_effort_controller:

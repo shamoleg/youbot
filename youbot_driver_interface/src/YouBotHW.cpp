@@ -52,8 +52,8 @@ yb::YouBotHW::YouBotHW(std::vector<std::string> joint_names) :
 
 bool yb::YouBotHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
 {
-    ros::V_string joint_names = boost::assign::list_of("wheel_joint_fl")
-            ("wheel_joint_fr")("wheel_joint_bl")("wheel_joint_br");
+    ros::V_string joint_names = boost::assign::list_of("wheel_joint_br")("wheel_joint_bl")("wheel_joint_fr")("wheel_joint_fl")
+            ;
 
     for (unsigned int i = 0; i < joint_names.size(); i++)
     {
@@ -116,7 +116,28 @@ void yb::YouBotHW::read(const ros::Time &time, const ros::Duration &period) {
 
 
 void yb::YouBotHW::write(const ros::Time &time, const ros::Duration &period) {
+    static std::vector<youbot::JointCurrentSetpoint> jointsCurren(BASEJOINTS);
+    static std::vector<youbot::JointVelocitySetpoint> jointsVelocity(BASEJOINTS);
+    static std::vector<youbot::JointAngleSetpoint> jointsAngle(BASEJOINTS);
 
+    if(interface_switcher.at("hardware_interface::EffortJointInterface")){
+        for(int i = 0; i < BASEJOINTS; ++i){
+            jointsCurren[i].current = joints_cmd_[i].effort * ampere;
+        }
+        youBotBaseHardware.setJointData(jointsCurren);
+    }
+    else if(interface_switcher.at("hardware_interface::VelocityJointInterface")){
+        for(int i = 0; i < BASEJOINTS; ++i){
+            jointsVelocity[i].angularVelocity = joints_cmd_[i].velocity * radian_per_second;
+        }
+        youBotBaseHardware.setJointData(jointsVelocity);
+    }
+    else if(interface_switcher.at("hardware_interface::PositionJointInterface")){
+        for(int i = 0; i < BASEJOINTS; ++i){
+            jointsCurren[i].current = joints_cmd_[i].effort * ampere;
+        }
+        youBotBaseHardware.setJointData(jointsAngle);
+    }
 }
 
 
