@@ -10,6 +10,7 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 
+
 /* youbot includes */
 #include "youbot_driver/youbot/YouBotBase.hpp"
 #include <youbot_driver/youbot/YouBotManipulator.hpp>
@@ -53,7 +54,7 @@ public:
     void setJointPosition(const std_msgs::Float32MultiArray& msgJointPosition) override;
     void setJointVelocity(const std_msgs::Float32MultiArray& msgJointVelocity) override;
     void setJointTorque(const std_msgs::Float32MultiArray& msgJointTorque) override;
-    void setJointCurrent(const std_msgs::Float32MultiArray& msgJointTorque) override;
+    void setJointCurrent(const std_msgs::Float32MultiArray& msgJointTorque);
     void getJointState(sensor_msgs::JointState& msgJointState) override;
 
     void setBaseVelocity(const geometry_msgs::Twist& msgBaseVelocity) override;

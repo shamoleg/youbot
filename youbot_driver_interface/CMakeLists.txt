@@ -4,6 +4,9 @@ project(youbot_driver_interface)
 add_compile_options(-std=c++14)
 
 find_package(catkin REQUIRED COMPONENTS
+		controller_manager
+		hardware_interface
+		realtime_tools
 		ros_robot_wrapper
 		youbot_driver
 		controller_manager
@@ -21,13 +24,13 @@ INCLUDE_DIRECTORIES(
 )
 
 catkin_package(
-  CATKIN_DEPENDS  
+  CATKIN_DEPENDS
   youbot_driver
   ros_robot_wrapper 
   roscpp
 )
 
-add_executable(youbot_driver_interface
+add_executable(${PROJECT_NAME}
 				src/YouBotHW.cpp
 				src/yuobot_hw_node.cpp)
 
@@ -37,16 +40,6 @@ target_link_libraries(${PROJECT_NAME}
 		${catkin_LIBRARIES}
 		${Boost_LIBRARIES}
 		)
-
-#add_executable(yuobot_hw_node
-#		src/YouBotHW.cpp
-#		src/yuobot_hw_node.cpp)
-#add_dependencies(yuobot_hw_node ${catkin_EXPORTED_TARGETS})
-#
-#target_link_libraries(yuobot_hw_node
-#		${catkin_LIBRARIES}
-#		${Boost_LIBRARIES}
-#		)
 
 
 install(DIRECTORY launch/

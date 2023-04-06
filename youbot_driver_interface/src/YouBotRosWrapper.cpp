@@ -190,7 +190,7 @@ void BridgeRosToYouBotBase::getBaseVelocity(geometry_msgs::Twist& msgBaseVelocit
 }
 
 
-void BridgeRosToYouBotBase::getBasePosition(geometry_msgs::Pose& msgBasePosition) {
+void BridgeRosToYouBotBase::getBasePosition(geometry_msgs::Pose msgBasePosition) {
     static quantity<si::length> positionX;
     static quantity<si::length> positionY;
     static quantity<plane_angle> orientationZ;

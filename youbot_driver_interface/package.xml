@@ -53,6 +53,9 @@
   <build_depend>roscpp</build_depend>
   <build_depend>youbot_driver</build_depend>
   <build_depend>ros_robot_wrapper</build_depend>
+  <build_depend>mecanum_control</build_depend>
+
+  <exec_depend>mecanum_drive_controller</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>youbot_driver</exec_depend>
