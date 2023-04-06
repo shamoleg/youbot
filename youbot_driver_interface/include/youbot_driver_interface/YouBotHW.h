@@ -2,8 +2,8 @@
 // Created by sham on 29.03.23.
 //
 
-#ifndef SRC_YOUBOTBASEHW_H
-#define SRC_YOUBOTBASEHW_H
+#ifndef SRC_YOUBOTHW_H
+#define SRC_YOUBOTHW_H
 
 #define ARMJOINTS 5
 #define GRIPPERBAR1 5
@@ -43,9 +43,9 @@ struct Joint{
     double absolute_position;
 };
 
-class YouBotBaseHW : public hardware_interface::RobotHW {
+class YouBotHW : public hardware_interface::RobotHW {
 public:
-    explicit YouBotBaseHW(const std::vector<std::string>& joint_names);
+    explicit YouBotHW(const std::vector<std::string>& joint_names);
 
     bool init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh) override;
 
@@ -114,4 +114,4 @@ private:
 
 
 }
-#endif //SRC_YOUBOTBASEHW_H
+#endif //SRC_YOUBOTHW_H

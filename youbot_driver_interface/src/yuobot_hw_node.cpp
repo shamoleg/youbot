@@ -9,7 +9,7 @@
 #include <controller_manager/controller_manager.h>
 #include <ros/ros.h>
 
-#include <YouBotBaseHW.h>
+#include <YouBotHW.h>
 
 void treadController(hardware_interface::RobotHW* yb, controller_manager::ControllerManager* cm, ros::Rate rate)
 {
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]){
     ros::NodeHandle nh_base_priv("~base");
     std::vector<std::string> joints = {"wheel_joint_fl", "wheel_joint_fr", "wheel_joint_bl", "wheel_joint_br"};
 
-    yb::YouBotBaseHW youbot_base(joints);
+    yb::YouBotHW youbot_base(joints);
     controller_manager::ControllerManager cm_base(&youbot_base, nh_base);
     youbot_base.init(nh_base, nh_base_priv);
 

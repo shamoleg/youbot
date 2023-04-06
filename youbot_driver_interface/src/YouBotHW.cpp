@@ -2,7 +2,7 @@
 // Created by sham on 29.03.23.
 //
 
-#include "YouBotBaseHW.h"
+#include "YouBotHW.h"
 
 
 yb::Joint::Joint() :
@@ -42,7 +42,7 @@ void print_interface_switcher(const InterfaceSwitcher& i_switcher){
 }
 
 
-yb::YouBotBaseHW::YouBotBaseHW(const std::vector<std::string>& joint_names) :
+yb::YouBotHW::YouBotHW(const std::vector<std::string>& joint_names) :
         youBotBaseHardware("youbot-base", "/home/sham/catkin_ws/src/youbot/youbot_driver/config"),
         joints_sensed_(gen_joints(joint_names)),
         joints_cmd_(gen_joints(joint_names))
@@ -51,7 +51,7 @@ yb::YouBotBaseHW::YouBotBaseHW(const std::vector<std::string>& joint_names) :
     youBotBaseHardware.doJointCommutation();
 }
 
-bool yb::YouBotBaseHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
+bool yb::YouBotHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
 {
     for (int i = 0; i < joints_sensed_.size(); i++)
     {
@@ -88,7 +88,7 @@ bool yb::YouBotBaseHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_
     return true;
 }
 
-void yb::YouBotBaseHW::read(const ros::Time &time, const ros::Duration &period) {
+void yb::YouBotHW::read(const ros::Time &time, const ros::Duration &period) {
     static std::vector<youbot::JointSensedAngle> jointSensedAngle(BASEJOINTS);
     youBotBaseHardware.getJointData(jointSensedAngle);
 
@@ -111,7 +111,7 @@ void yb::YouBotBaseHW::read(const ros::Time &time, const ros::Duration &period) 
 }
 
 
-void yb::YouBotBaseHW::write(const ros::Time &time, const ros::Duration &period) {
+void yb::YouBotHW::write(const ros::Time &time, const ros::Duration &period) {
     static std::vector<youbot::JointCurrentSetpoint> jointsCurren(BASEJOINTS);
     static std::vector<youbot::JointVelocitySetpoint> jointsVelocity(BASEJOINTS);
     static std::vector<youbot::JointAngleSetpoint> jointsAngle(BASEJOINTS);
@@ -137,15 +137,15 @@ void yb::YouBotBaseHW::write(const ros::Time &time, const ros::Duration &period)
 }
 
 
-bool yb::YouBotBaseHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo> &start_list,
-                                     const std::list<hardware_interface::ControllerInfo> &stop_list) {
+bool yb::YouBotHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo> &start_list,
+                                 const std::list<hardware_interface::ControllerInfo> &stop_list) {
     std::cout << " prepareSwitch " << std::endl;
     return true;
 }
 
 
-void yb::YouBotBaseHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start_list,
-                                const std::list<hardware_interface::ControllerInfo> &stop_list) {
+void yb::YouBotHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &start_list,
+                            const std::list<hardware_interface::ControllerInfo> &stop_list) {
 
     for (auto& controller_it : stop_list){
         for(auto &resource : controller_it.claimed_resources){
