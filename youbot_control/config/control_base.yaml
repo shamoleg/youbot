@@ -12,34 +12,9 @@ youbot_base/joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: *loop_hz
 
-youbot_base/my_booy:
-  type: mecanum_drive_controller/MecanumDriveController
-  front_left_wheel_joint: wheel_joint_fl
-  back_left_wheel_joint: wheel_joint_bl
-  front_right_wheel_joint: wheel_joint_fr
-  back_right_wheel_joint: wheel_joint_br
-  wheel_separation_x: 0.3
-  wheel_separation_y: 0.47
-  wheel_radius: 0.0475
-
-arm_hardware_interface:
-  joints: &arm_joints
-    - j1
-    - j2
-    - j3
-    - j4
-    - j5
-  gripper: &gripper_joints
-    - gl
-    - gr
-
-youbot_arm/gripper_pos_controller:
-  type: position_controllers/JointGroupPositionController
-  joints: *gripper_joints
-
 youbot_arm/joints_eff_controller:
   type: effort_controllers/JointGroupEffortController
-  joints: *arm_joints
+  joints: *base_joints
 
 youbot_arm/joints_vel_controller:
   type: velocity_controllers/JointGroupVelocityController
@@ -49,4 +24,12 @@ youbot_arm/joints_pos_controller:
   type: position_controllers/JointGroupPositionController
   joints: *base_joints
 
-
+youbot_base/mecanum_drive_controller:
+  type: mecanum_drive_controller/MecanumDriveController
+  front_left_wheel_joint: wheel_joint_fl
+  back_left_wheel_joint: wheel_joint_bl
+  front_right_wheel_joint: wheel_joint_fr
+  back_right_wheel_joint: wheel_joint_br
+  wheel_separation_x: 0.3
+  wheel_separation_y: 0.47
+  wheel_radius: 0.0475

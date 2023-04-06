@@ -90,17 +90,14 @@ bool yb::YouBotHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
 
 void yb::YouBotHW::read(const ros::Time &time, const ros::Duration &period) {
     static std::vector<youbot::JointSensedAngle> jointSensedAngle(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedAngle);
-
     static std::vector<youbot::JointSensedVelocity> jointSensedVelocity(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedVelocity);
-
     static std::vector<youbot::JointSensedCurrent> jointSensedCurrent(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedCurrent);
-
     static std::vector<youbot::JointSensedTorque> jointSensedTorque(BASEJOINTS);
-    youBotBaseHardware.getJointData(jointSensedTorque);
 
+    youBotBaseHardware.getJointData(jointSensedAngle);
+    youBotBaseHardware.getJointData(jointSensedVelocity);
+    youBotBaseHardware.getJointData(jointSensedCurrent);
+    youBotBaseHardware.getJointData(jointSensedTorque);
 
     for(int i = 0; i < BASEJOINTS; ++i){
         joints_sensed_[i].position = jointSensedAngle[i].angle.value();
@@ -171,8 +168,6 @@ yb::YouBotArmHW::YouBotArmHW(const vector<std::string> &joint_names) :
         joints_cmd_(gen_joints(joint_names))
 {
     youBotArmHardware.doJointCommutation();
-    youBotArmHardware.calibrateManipulator(true);
-    youBotArmHardware.calibrateGripper(true);
 }
 
 bool yb::YouBotArmHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh) {
@@ -218,7 +213,22 @@ bool yb::YouBotArmHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_n
 }
 
 void yb::YouBotArmHW::read(const ros::Time &time, const ros::Duration &period) {
-    RobotHW::read(time, period);
+    static std::vector<youbot::JointSensedAngle> jointSensedAngle(ARMJOINTS);
+    static std::vector<youbot::JointSensedVelocity> jointSensedVelocity(ARMJOINTS);
+    static std::vector<youbot::JointSensedCurrent> jointSensedCurrent(ARMJOINTS);
+    static std::vector<youbot::JointSensedTorque> jointSensedTorque(ARMJOINTS);
+
+    youBotArmHardware.getJointData(jointSensedAngle);
+    youBotArmHardware.getJointData(jointSensedVelocity);
+    youBotArmHardware.getJointData(jointSensedCurrent);
+    youBotArmHardware.getJointData(jointSensedTorque);
+
+    for(int i = 0; i < ARMJOINTS; ++i){
+        joints_sensed_[i].position = jointSensedAngle[i].angle.value();
+        joints_sensed_[i].velocity = jointSensedVelocity[i].angularVelocity.value();
+        joints_sensed_[i].effort = jointSensedCurrent[i].current.value();
+        joints_sensed_[i].torque = jointSensedTorque[i].torque.value();
+    }
 }
 
 

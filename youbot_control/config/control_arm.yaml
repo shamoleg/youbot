@@ -1,0 +1,33 @@
+hardware_control_loop:
+  loop_hz: &loop_hz 125
+
+arm_hardware_interface:
+  joints: &arm_joints
+    - j1
+    - j2
+    - j3
+    - j4
+    - j5
+  gripper: &gripper_joints
+    - gl
+    - gr
+
+youbot_arm/joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: *loop_hz
+
+youbot_arm/gripper_pos_controller:
+  type: position_controllers/JointGroupPositionController
+  joints: *gripper_joints
+
+youbot_arm/joints_eff_controller:
+  type: effort_controllers/JointGroupEffortController
+  joints: *arm_joints
+
+youbot_arm/joints_vel_controller:
+  type: velocity_controllers/JointGroupVelocityController
+  joints: *arm_joints
+
+youbot_arm/joints_pos_controller:
+  type: position_controllers/JointGroupPositionController
+  joints: *arm_joints

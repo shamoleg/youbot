@@ -1,50 +1,21 @@
 <!-- <?xml version="1.0"?> -->
-<!-- <launch> -->
-<!-- 	<arg name="runArmControllerManager" value="false"/> -->
-
-<!-- 	<param name="youBotConfigurationFilePath" type="string" value="$(find youbot_driver)/config"/> -->
-<!-- 	<param name="youBotBaseName" type="str" value="youbot-base"/> -->
-<!-- 	<param name="youBotArmName1" type="str" value="youbot-manipulator"/> -->
-<!-- 	<param name="driverCycleFrequencyInHz" value="30"/> -->
-<!-- 	 -->
-<!-- 	<rosparam file="$(find youbot_driver_interface)/param/youbot_configuration.yaml" command="load" /> -->
-
-<!-- 	<group if="$(arg runArmControllerManager)"> -->
-<!-- 		<rosparam file="$(find youbot_driver_interface)/param/youbot_arm_controllers.yaml" command="load"/> -->
-<!-- 		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" -->
-<!-- 			output="screen" args="spawn joint_state_controller position_trajectory_controller gripper_controller" /> -->
-<!-- 	</group> -->
-
-<!-- 	<node name="youbot_driver" pkg="youbot_driver_interface" type="youbot_driver_interface" output="screen"/> -->
-
-<!-- 	<param name="robot_description" command="$(find xacro)/xacro $(find youbot_description)/robots/youbot_tpu_real.urdf.xacro" /> -->
-
-<!-- 	 --><!-- <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"> -->
-<!-- 		<remap from="joint_states" to="arm/joint_states" /> -->
-<!-- 		<param name="ignore_timestamp" value="true"/> -->
-<!-- 	</node> -->
-
-<!-- <?xml version="1.0"?> -->
 <launch>
 
-    <rosparam command="load" file="$(dirname)/../config/control.yaml" />
-    <arg name="controllers" default="joint_state_controller my_booy" doc="Controllers that are activated by default."/>
-    <arg name="stopped_controllers" default="joint_group_pos_controller joint_group_effort_controller" doc="Controllers that are initally loaded, but not started."/>
+    <rosparam command="load" file="$(dirname)/../config/control_base.yaml" />
+    <rosparam command="load" file="$(dirname)/../config/control_arm.yaml" />
 
-    <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
+    <arg name="base_controllers" default="joint_state_controller mecanum_drive_controller"/>
+    <arg name="arm_controllers" default="joint_state_controller joints_eff_controller"/>
+
+    <node name="controller_spawner_base" pkg="controller_manager" type="spawner"
           args=" --namespace=/youbot_base
-          $(arg controllers)" output="screen" respawn="false" />
+          $(arg base_controllers)" output="screen" respawn="false" />
 
     <node name="ros_control_controller_spawner1" pkg="controller_manager" type="spawner"
           args=" --namespace=/youbot_arm
-          joints_eff_controller " output="screen" respawn="false" />
+          $(arg arm_controllers)" output="screen" respawn="false" />
 
-    <!-- Load other controllers, but do not start them -->
-<!--    <node name="ros_control_stopped_spawner" pkg="controller_manager" type="spawner"-->
-<!--          args="&#45;&#45;stopped $(arg stopped_controllers)" output="screen" respawn="false" />-->
-
-    <node name="youbot_driver" pkg="youbot_driver_interface" type="youbot_driver_interface" output="screen"/>
-
+    <node name="youbot_control" pkg="youbot_control" type="youbot_control" output="screen"/>
 
 
 </launch>
