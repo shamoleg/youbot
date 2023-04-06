@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(youbot_driver_interface)
+project(youbot_control)
 
 add_compile_options(-std=c++14)
 
@@ -7,9 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
 		controller_manager
 		hardware_interface
 		realtime_tools
-		ros_robot_wrapper
 		youbot_driver
-		controller_manager
 		tf)
 
 find_package(Boost REQUIRED COMPONENTS thread date_time filesystem system )
@@ -18,7 +16,7 @@ ADD_DEFINITIONS(-DYOUBOT_CONFIGURATIONS_DIR=${youbot_driver_CONFIG_DIR})
 
 INCLUDE_DIRECTORIES(
 	include
-  	include/youbot_driver_interface
+  	include/youbot_control
 	${catkin_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIR}
 )
@@ -34,7 +32,7 @@ add_executable(${PROJECT_NAME}
 				src/YouBotHW.cpp
 				src/yuobot_hw_node.cpp)
 
-add_dependencies(youbot_driver_interface ${catkin_EXPORTED_TARGETS})
+add_dependencies(youbot_control ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(${PROJECT_NAME}
 		${catkin_LIBRARIES}
