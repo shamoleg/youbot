@@ -1,5 +1,5 @@
 hardware_control_loop:
-  loop_hz: &loop_hz 125
+  loop_hz: &loop_hz 30
 
 base_hardware_interface:
   joints: &base_joints
@@ -15,14 +15,17 @@ youbot_base/joint_state_controller:
 youbot_arm/joints_eff_controller:
   type: effort_controllers/JointGroupEffortController
   joints: *base_joints
+  publish_rate: *loop_hz
 
 youbot_arm/joints_vel_controller:
   type: velocity_controllers/JointGroupVelocityController
   joints: *base_joints
+  publish_rate: *loop_hz
 
 youbot_arm/joints_pos_controller:
   type: position_controllers/JointGroupPositionController
   joints: *base_joints
+  publish_rate: *loop_hz
 
 youbot_base/mecanum_drive_controller:
   type: mecanum_drive_controller/MecanumDriveController

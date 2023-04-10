@@ -11,18 +11,28 @@
 
 #include <YouBotHW.h>
 
+boost::mutex fuck;
+
 void treadController(hardware_interface::RobotHW* yb, controller_manager::ControllerManager* cm, ros::Rate rate)
 {
     auto timePrev = boost::chrono::steady_clock::now();
-    while (true){
-        auto timeCurr = boost::chrono::steady_clock::now();
-        boost::chrono::duration<double> durationB = timeCurr - timePrev;
-        ros::Duration duration(durationB.count());
-        timePrev = timeCurr;
-        yb->read(ros::Time::now(), duration);
-        cm->update(ros::Time::now(), duration);
-        yb->write(ros::Time::now(), duration);
-        rate.sleep();
+
+    try {
+        while (true) {
+
+            auto timeCurr = boost::chrono::steady_clock::now();
+            boost::chrono::duration<double> durationB = timeCurr - timePrev;
+            ros::Duration duration(durationB.count());
+            timePrev = timeCurr;
+            boost::unique_lock<boost::mutex> s_l(fuck);
+            yb->read(ros::Time::now(), duration);
+            cm->update(ros::Time::now(), duration);
+            yb->write(ros::Time::now(), duration);
+            rate.sleep();
+        }
+    }
+    catch(std::exception& e){
+        ROS_ERROR("\n\n\n\nim cry %s", e.what());
     }
 }
 
@@ -42,15 +52,23 @@ int main(int argc, char* argv[]){
 
     boost::thread(boost::bind(treadController, &youbot_base, &cm_base, ros::Rate(60)));
 
-    ros::NodeHandle nh_arm("youbot_arm");
-    ros::NodeHandle nh_arm_priv("~arm");
-    std::vector<std::string> joints_arm = {"j1", "j2", "j3", "j4", "j5", "gl", "gr"};
-
-    yb::YouBotArmHW youbot_arm(joints_arm);
-    controller_manager::ControllerManager cm_arm(&youbot_arm, nh_arm);
-    youbot_arm.init(nh_arm, nh_arm_priv);
-
-    boost::thread(boost::bind(treadController, &youbot_arm, &cm_arm, ros::Rate(60)));
+//    ros::NodeHandle nh_arm("youbot_arm");
+//    ros::NodeHandle nh_arm_priv("~arm");
+//
+//    std::vector<std::string> joints_arm = {
+//            "arm_joint_1",
+//            "arm_joint_2",
+//            "arm_joint_3",
+//            "arm_joint_4",
+//            "arm_joint_5",
+//            "gripper_finger_joint_l",
+//            "gripper_finger_joint_r"
+//    };
+//    yb::YouBotArmHW youbot_arm(joints_arm);
+//    controller_manager::ControllerManager cm_arm(&youbot_arm, nh_arm);
+//    youbot_arm.init(nh_arm, nh_arm_priv);
+//
+//    boost::thread(boost::bind(treadController, &youbot_arm, &cm_arm, ros::Rate(30)));
 
     ros::spin();
     return 0;

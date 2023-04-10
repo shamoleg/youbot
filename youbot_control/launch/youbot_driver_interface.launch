@@ -5,7 +5,7 @@
     <rosparam command="load" file="$(dirname)/../config/control_arm.yaml" />
 
     <arg name="base_controllers" default="joint_state_controller mecanum_drive_controller"/>
-    <arg name="arm_controllers" default="joint_state_controller joints_eff_controller"/>
+    <arg name="arm_controllers" default="joint_state_controller joints_pos_controller"/>
 
     <node name="controller_spawner_base" pkg="controller_manager" type="spawner"
           args=" --namespace=/youbot_base
@@ -14,6 +14,17 @@
     <node name="ros_control_controller_spawner1" pkg="controller_manager" type="spawner"
           args=" --namespace=/youbot_arm
           $(arg arm_controllers)" output="screen" respawn="false" />
+
+
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+        <param name="publish_frequency" value="200"/>
+    </node>
+
+    <param name="robot_description"
+           command="$(find xacro)/xacro $(find youbot_description)/robots/youbot_tpu_real.urdf.xacro"/>
+
+    <remap from="youbot_arm/joint_states" to="joint_states" />
 
     <node name="youbot_control" pkg="youbot_control" type="youbot_control" output="screen"/>
 

@@ -20,6 +20,7 @@
 
 [Введение в ROS](https://github.com/shamoleg/course)
 
+sudo setcap cap_net_raw+ep devel/lib/youbot_control/youbot_control
 
 ## Установка
 
