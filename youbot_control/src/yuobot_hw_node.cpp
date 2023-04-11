@@ -42,33 +42,16 @@ int main(int argc, char* argv[]){
     ros::init(argc, argv, "youbot_hw");
 
 
-    ros::NodeHandle nh_base("youbot_base");
+    ros::NodeHandle nh_base("");
     ros::NodeHandle nh_base_priv("~base");
     std::vector<std::string> joints = {"wheel_joint_fl", "wheel_joint_fr", "wheel_joint_bl", "wheel_joint_br"};
 
-    yb::YouBotHW youbot_base(joints);
+    yb::YouBotHW youbot_base;
     controller_manager::ControllerManager cm_base(&youbot_base, nh_base);
     youbot_base.init(nh_base, nh_base_priv);
 
     boost::thread(boost::bind(treadController, &youbot_base, &cm_base, ros::Rate(60)));
 
-//    ros::NodeHandle nh_arm("youbot_arm");
-//    ros::NodeHandle nh_arm_priv("~arm");
-//
-//    std::vector<std::string> joints_arm = {
-//            "arm_joint_1",
-//            "arm_joint_2",
-//            "arm_joint_3",
-//            "arm_joint_4",
-//            "arm_joint_5",
-//            "gripper_finger_joint_l",
-//            "gripper_finger_joint_r"
-//    };
-//    yb::YouBotArmHW youbot_arm(joints_arm);
-//    controller_manager::ControllerManager cm_arm(&youbot_arm, nh_arm);
-//    youbot_arm.init(nh_arm, nh_arm_priv);
-//
-//    boost::thread(boost::bind(treadController, &youbot_arm, &cm_arm, ros::Rate(30)));
 
     ros::spin();
     return 0;

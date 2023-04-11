@@ -2,19 +2,15 @@
 <launch>
 
     <rosparam command="load" file="$(dirname)/../config/control_base.yaml" />
-    <rosparam command="load" file="$(dirname)/../config/control_arm.yaml" />
+    <rosparam file="$(dirname)/../config/hw.yaml" />
 
-    <arg name="base_controllers" default="joint_state_controller mecanum_drive_controller"/>
-    <arg name="arm_controllers" default="joint_state_controller joints_pos_controller"/>
+    <node name="youbot_control" pkg="youbot_control" type="youbot_control" output="screen"/>
+
+    <arg name="base_controllers" default="youbot_base/joint_state_controller youbot_base/joints_pos_controller"/>
 
     <node name="controller_spawner_base" pkg="controller_manager" type="spawner"
-          args=" --namespace=/youbot_base
+          args="
           $(arg base_controllers)" output="screen" respawn="false" />
-
-    <node name="ros_control_controller_spawner1" pkg="controller_manager" type="spawner"
-          args=" --namespace=/youbot_arm
-          $(arg arm_controllers)" output="screen" respawn="false" />
-
 
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
@@ -26,7 +22,6 @@
 
     <remap from="youbot_arm/joint_states" to="joint_states" />
 
-    <node name="youbot_control" pkg="youbot_control" type="youbot_control" output="screen"/>
 
 
 </launch>

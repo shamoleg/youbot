@@ -30,6 +30,7 @@ catkin_package(
 
 add_executable(${PROJECT_NAME}
 				src/YouBotHW.cpp
+				src/YouBotElementHW.cpp
 				src/yuobot_hw_node.cpp)
 
 add_dependencies(youbot_control ${catkin_EXPORTED_TARGETS})

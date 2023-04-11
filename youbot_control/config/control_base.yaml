@@ -1,7 +1,18 @@
 hardware_control_loop:
   loop_hz: &loop_hz 30
 
-base_hardware_interface:
+youbot_base:
+  config_name: "youbot-base"
+  config_path: "/home/sham/catkin_ws/src/youbot/youbot_control/config/"
+  controllers:
+    - youbot_base/joint_state_controller
+    - youbot_base/joints_eff_controller
+    - youbot_base/joints_vel_controller
+    - youbot_base/joints_pos_controller
+    - youbot_base/mecanum_drive_controller
+
+
+youbot_base/base_hardware_interface:
   joints: &base_joints
     - wheel_joint_fl
     - wheel_joint_fr
@@ -12,22 +23,22 @@ youbot_base/joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: *loop_hz
 
-youbot_arm/joints_eff_controller:
+joints_eff_controller:
   type: effort_controllers/JointGroupEffortController
   joints: *base_joints
   publish_rate: *loop_hz
 
-youbot_arm/joints_vel_controller:
+joints_vel_controller:
   type: velocity_controllers/JointGroupVelocityController
   joints: *base_joints
   publish_rate: *loop_hz
 
-youbot_arm/joints_pos_controller:
+youbot_base/joints_pos_controller:
   type: position_controllers/JointGroupPositionController
   joints: *base_joints
   publish_rate: *loop_hz
 
-youbot_base/mecanum_drive_controller:
+mecanum_drive_controller:
   type: mecanum_drive_controller/MecanumDriveController
   front_left_wheel_joint: wheel_joint_fl
   back_left_wheel_joint: wheel_joint_bl
