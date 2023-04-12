@@ -4,12 +4,10 @@ hardware_control_loop:
 youbot_base:
   config_name: "youbot-base"
   config_path: "/home/sham/catkin_ws/src/youbot/youbot_control/config/"
-  controllers:
-    - youbot_base/joint_state_controller
-    - youbot_base/joints_eff_controller
-    - youbot_base/joints_vel_controller
-    - youbot_base/joints_pos_controller
-    - youbot_base/mecanum_drive_controller
+
+youbot_arm:
+  config_name: "youbot-manipulator"
+  config_path: "/home/sham/catkin_ws/src/youbot/youbot_control/config/"
 
 
 youbot_base/base_hardware_interface:

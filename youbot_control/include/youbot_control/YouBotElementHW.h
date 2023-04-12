@@ -5,6 +5,12 @@
 #ifndef SRC_YOUBOTELEMENTHW_H
 #define SRC_YOUBOTELEMENTHW_H
 
+#define ARMJOINTS 7
+#define GRIPPERJOINTS 2
+#define GRIPPERBAR1 5
+#define GRIPPERBAR2 6
+
+
 #include "boost/thread.hpp"
 #include <memory>
 
@@ -50,6 +56,7 @@ std::vector<yb::Joint> gen_joints(std::vector<std::string> joint_names);
 
 void print_joints(const std::vector<yb::Joint>& joints);
 
+
 class ElementHW {
 public:
     virtual bool init(const ros::NodeHandle &root_nh, const ros::NodeHandle &robot_hw_nh) { return true; };
@@ -70,6 +77,7 @@ public:
     std::vector<Joint> joints_cmd_;
 };
 
+
 class YouBotBaseHW : public ElementHW {
 public:
     bool init(const ros::NodeHandle &root_nh, const ros::NodeHandle &robot_hw_nh) override;
@@ -80,6 +88,19 @@ public:
 
 private:
     std::unique_ptr<youbot::YouBotBase> youBotBase;
+};
+
+
+class YouBotArmHW : public ElementHW {
+public:
+    bool init(const ros::NodeHandle &root_nh, const ros::NodeHandle &robot_hw_nh) override;
+
+    void read(const ros::Time &time, const ros::Duration &period) override;
+
+    void write(const ros::Time &time, const ros::Duration &period) override;
+
+private:
+    std::unique_ptr<youbot::YouBotManipulator> youBotManipulator;
 };
 
 

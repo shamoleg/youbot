@@ -81,8 +81,13 @@ bool YouBotBaseHW::init(const ros::NodeHandle &root_nh, const ros::NodeHandle &r
     joints_sensed_ = gen_joints(joints_names);
     joints_cmd_ = joints_sensed_;
 
-    std::vector<std::string> controllers_name;
-    root_nh.param("controllers", controllers_name, controllers_name);
+    std::vector<std::string> controllers_name = {
+            "youbot_base/joint_state_controller",
+            "youbot_base/joints_eff_controller",
+            "youbot_base/joints_vel_controller",
+            "youbot_base/joints_pos_controller",
+            "youbot_base/mecanum_drive_controller"
+    };
     cmd_switcher_ = gen_switcher(controllers_name);
 
     return true;
@@ -114,7 +119,12 @@ void YouBotBaseHW::write(const ros::Time &time, const ros::Duration &period) {
     static std::vector<youbot::JointVelocitySetpoint> jointsVelocity(BASEJOINTS);
     static std::vector<youbot::JointAngleSetpoint> jointsAngle(BASEJOINTS);
 
-    if (cmd_switcher_.at("youbot_base/joints_eff_controller")) {
+    if (cmd_switcher_.at("youbot_base/joints_vel_controller")) {
+        for (int i = 0; i < BASEJOINTS; ++i) {
+            jointsVelocity.at(i).angularVelocity = joints_cmd_.at(i).velocity * radian_per_second;
+        }
+        youBotBase->setJointData(jointsVelocity);
+    } else if (cmd_switcher_.at("youbot_base/joints_eff_controller")) {
         for (int i = 0; i < BASEJOINTS; ++i) {
             jointsCurren.at(i).current = joints_cmd_.at(i).effort * ampere;
         }
@@ -133,6 +143,41 @@ void YouBotBaseHW::write(const ros::Time &time, const ros::Duration &period) {
     }
 }
 
+bool YouBotArmHW::init(const ros::NodeHandle &root_nh, const ros::NodeHandle &robot_hw_nh) {
+    std::string config_name;
+    std::string config_path;
+    root_nh.param("config_name", config_name, config_name);
+    root_nh.param("config_path", config_path, config_path);
+    youBotManipulator = std::make_unique<youbot::YouBotManipulator>(config_name, config_path);
+    youBotManipulator->doJointCommutation();
+
+    std::vector<std::string> joints_names(ARMJOINTS);
+    std::vector<std::string> gripper_names(GRIPPERJOINTS);
+    root_nh.param("arm_hardware_interface/joints", joints_names, joints_names);
+    root_nh.param("arm_hardware_interface/gripper_names", gripper_names, gripper_names);
+    joints_names.at(GRIPPERBAR1) = gripper_names.at(0);
+    joints_names.at(GRIPPERBAR2) = gripper_names.at(1);
+    joints_sensed_ = gen_joints(joints_names);
+    joints_cmd_ = joints_sensed_;
+
+    std::vector<std::string> controllers_name = {
+            "youbot_arm/joint_state_controller",
+            "youbot_arm/joints_eff_controller",
+            "youbot_arm/joints_vel_controller",
+            "youbot_arm/joints_pos_controller"
+    };
+    cmd_switcher_ = gen_switcher(controllers_name);
+
+    return true;
+}
+
+void YouBotArmHW::read(const ros::Time &time, const ros::Duration &period) {
+    ElementHW::read(time, period);
+}
+
+void YouBotArmHW::write(const ros::Time &time, const ros::Duration &period) {
+    ElementHW::write(time, period);
+}
 }
 
 
