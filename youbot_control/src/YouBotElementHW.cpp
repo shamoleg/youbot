@@ -191,8 +191,39 @@ void YouBotArmHW::read(const ros::Time &time, const ros::Duration &period) {
 }
 
 void YouBotArmHW::write(const ros::Time &time, const ros::Duration &period) {
-    ElementHW::write(time, period);
+    static std::vector<youbot::JointCurrentSetpoint> jointsCurren(ARMJOINTS);
+    static std::vector<youbot::JointVelocitySetpoint> jointsVelocity(ARMJOINTS);
+    static std::vector<youbot::JointAngleSetpoint> jointsAngle(ARMJOINTS);
+    static youbot::GripperBarPositionSetPoint gripper1_pose;
+    static youbot::GripperBarPositionSetPoint gripper2_pose;
+
+    if(cmd_switcher_.at("youbot_arm/joints_eff_controller")){
+        for(int i = 0; i < ARMJOINTS; ++i){
+            jointsCurren.at(i).current = joints_cmd_.at(i).effort * ampere;
+        }
+        youBotManipulator->setJointData(jointsCurren);
+    }
+    else if(cmd_switcher_.at("youbot_arm/joints_vel_controller")){
+        for(int i = 0; i < ARMJOINTS; ++i){
+            jointsVelocity.at(i).angularVelocity = joints_cmd_.at(i).velocity * radian_per_second;
+        }
+        youBotManipulator->setJointData(jointsVelocity);
+    }
+    else if(cmd_switcher_.at("youbot_arm/joints_pos_controller")){
+        for(int i = 0; i < ARMJOINTS; ++i){
+            jointsCurren.at(i).current = joints_cmd_.at(i).effort * ampere;
+        }
+        youBotManipulator->setJointData(jointsAngle);
+    }
+    if(cmd_switcher_.at("youbot_arm/gripper_pos_controller")){
+        gripper1_pose.barPosition = joints_cmd_[GRIPPERBAR1].position * meter;
+        gripper2_pose.barPosition = joints_cmd_[GRIPPERBAR2].position * meter;
+//        youBotArmHardware.getArmGripper().getGripperBar1().setData(gripper1_pose);
+//        youBotArmHardware.getArmGripper().getGripperBar2().setData(gripper2_pose);
+    }
 }
+
+
 }
 
 
