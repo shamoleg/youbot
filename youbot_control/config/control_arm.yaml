@@ -1,7 +1,11 @@
 hardware_control_loop:
   loop_hz: &loop_hz 30
 
-arm_hardware_interface:
+youbot_arm:
+  config_name: "youbot-manipulator"
+  config_path: "/home/sham/catkin_ws/src/youbot/youbot_control/config/"
+
+youbot_arm/arm_hardware_interface:
   joints: &arm_joints
     - arm_joint_1
     - arm_joint_2
@@ -9,8 +13,8 @@ arm_hardware_interface:
     - arm_joint_4
     - arm_joint_5
   gripper: &gripper_joints
-    - gripper_finger_link_l
-    - gripper_finger_link_r
+    - gripper_finger_joint_l
+    - gripper_finger_joint_r
 
 youbot_arm/joint_state_controller:
   type: joint_state_controller/JointStateController

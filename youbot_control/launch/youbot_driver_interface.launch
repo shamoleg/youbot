@@ -2,15 +2,21 @@
 <launch>
 
     <rosparam command="load" file="$(dirname)/../config/control_base.yaml" />
-    <rosparam file="$(dirname)/../config/hw.yaml" />
+    <rosparam command="load" file="$(dirname)/../config/control_arm.yaml" />
 
-    <node name="youbot_control" pkg="youbot_control" type="youbot_control" output="screen"/>
 
-    <arg name="base_controllers" default="youbot_base/joint_state_controller youbot_base/joints_pos_controller"/>
+    <arg name="base_controllers" default="youbot_base/joint_state_controller
+                                          youbot_base/mecanum_drive_controller
+                                          "/>
+
+    <arg name="arm_controllers" default="youbot_arm/joints_vel_controller
+                                         "/>
 
     <node name="controller_spawner_base" pkg="controller_manager" type="spawner"
-          args="
-          $(arg base_controllers)" output="screen" respawn="false" />
+          args="$(arg base_controllers)" output="screen" respawn="false" />
+
+    <node name="controller_spawner_arm" pkg="controller_manager" type="spawner"
+          args="$(arg arm_controllers)" output="screen" respawn="false" />
 
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
@@ -20,8 +26,7 @@
     <param name="robot_description"
            command="$(find xacro)/xacro $(find youbot_description)/robots/youbot_tpu_real.urdf.xacro"/>
 
-    <remap from="youbot_arm/joint_states" to="joint_states" />
-
+    <node name="youbot_control" pkg="youbot_control" type="youbot_control" output="screen"/>
 
 
 </launch>

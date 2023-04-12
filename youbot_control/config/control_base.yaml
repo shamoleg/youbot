@@ -5,28 +5,23 @@ youbot_base:
   config_name: "youbot-base"
   config_path: "/home/sham/catkin_ws/src/youbot/youbot_control/config/"
 
-youbot_arm:
-  config_name: "youbot-manipulator"
-  config_path: "/home/sham/catkin_ws/src/youbot/youbot_control/config/"
-
-
 youbot_base/base_hardware_interface:
   joints: &base_joints
-    - wheel_joint_fl
-    - wheel_joint_fr
-    - wheel_joint_bl
-    - wheel_joint_br
+    - caster_joint_fl
+    - caster_joint_fr
+    - caster_joint_bl
+    - caster_joint_br
 
 youbot_base/joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: *loop_hz
 
-joints_eff_controller:
+youbot_base/joints_eff_controller:
   type: effort_controllers/JointGroupEffortController
   joints: *base_joints
   publish_rate: *loop_hz
 
-joints_vel_controller:
+youbot_base/joints_vel_controller:
   type: velocity_controllers/JointGroupVelocityController
   joints: *base_joints
   publish_rate: *loop_hz
@@ -36,12 +31,12 @@ youbot_base/joints_pos_controller:
   joints: *base_joints
   publish_rate: *loop_hz
 
-mecanum_drive_controller:
+youbot_base/mecanum_drive_controller:
   type: mecanum_drive_controller/MecanumDriveController
-  front_left_wheel_joint: wheel_joint_fl
-  back_left_wheel_joint: wheel_joint_bl
-  front_right_wheel_joint: wheel_joint_fr
-  back_right_wheel_joint: wheel_joint_br
+  front_left_wheel_joint: caster_joint_fl
+  back_left_wheel_joint: caster_joint_bl
+  front_right_wheel_joint: caster_joint_fr
+  back_right_wheel_joint: caster_joint_br
   wheel_separation_x: 0.3
   wheel_separation_y: 0.47
   wheel_radius: 0.0475

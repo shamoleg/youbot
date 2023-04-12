@@ -18,7 +18,7 @@ InterfaceSwitcher gen_switcher(const std::vector<std::string>& controllers_name)
 
 void print_interface_switcher(const InterfaceSwitcher &i_switcher) {
     for (const auto &i: i_switcher) {
-        std::cout << i.first << ": " << i.second << std::endl;
+        ROS_INFO("%s is %i", i.first.c_str(), i.second);
     }
 }
 
@@ -64,7 +64,6 @@ void ElementHW::doSwitch(const std::list<hardware_interface::ControllerInfo> &st
         if (cmd_switcher_.count(controller_it.name))
             cmd_switcher_.at(controller_it.name) = true;
     }
-    print_interface_switcher(cmd_switcher_);
 }
 
 
@@ -119,7 +118,7 @@ void YouBotBaseHW::write(const ros::Time &time, const ros::Duration &period) {
     static std::vector<youbot::JointVelocitySetpoint> jointsVelocity(BASEJOINTS);
     static std::vector<youbot::JointAngleSetpoint> jointsAngle(BASEJOINTS);
 
-    if (cmd_switcher_.at("youbot_base/joints_vel_controller")) {
+    if (cmd_switcher_.at("youbot_base/mecanum_drive_controller")) {
         for (int i = 0; i < BASEJOINTS; ++i) {
             jointsVelocity.at(i).angularVelocity = joints_cmd_.at(i).velocity * radian_per_second;
         }
@@ -138,7 +137,6 @@ void YouBotBaseHW::write(const ros::Time &time, const ros::Duration &period) {
         for (int i = 0; i < BASEJOINTS; ++i) {
             jointsAngle.at(i).angle = joints_cmd_.at(i).position * radians;
         }
-        print_joints(joints_cmd_);
         youBotBase->setJointData(jointsAngle);
     }
 }
@@ -150,21 +148,29 @@ bool YouBotArmHW::init(const ros::NodeHandle &root_nh, const ros::NodeHandle &ro
     root_nh.param("config_path", config_path, config_path);
     youBotManipulator = std::make_unique<youbot::YouBotManipulator>(config_name, config_path);
     youBotManipulator->doJointCommutation();
+    youBotManipulator->calibrateManipulator();
 
-    std::vector<std::string> joints_names(ARMJOINTS + 2);
-    std::vector<std::string> gripper_names(GRIPPERJOINTS);
+    std::vector<std::string> joints_names;
+    std::vector<std::string> gripper_names;
     root_nh.param("arm_hardware_interface/joints", joints_names, joints_names);
-    root_nh.param("arm_hardware_interface/gripper_names", gripper_names, gripper_names);
-    joints_names.at(GRIPPERBAR1) = gripper_names.at(0);
-    joints_names.at(GRIPPERBAR2) = gripper_names.at(1);
+    root_nh.param("arm_hardware_interface/gripper", gripper_names, gripper_names);
+    joints_names.insert(joints_names.end(), gripper_names.begin(), gripper_names.end());
     joints_sensed_ = gen_joints(joints_names);
     joints_cmd_ = joints_sensed_;
 
+    std::vector<double> start_pos{0.0101, 0.0101, -0.016, 0.023, 0.12};
+    for(int i = 0; i < ARMJOINTS; i++){
+        joints_cmd_.at(i).position = start_pos.at(i);
+    }
+
+
+    print_joints(joints_sensed_);
     std::vector<std::string> controllers_name = {
             "youbot_arm/joint_state_controller",
             "youbot_arm/joints_eff_controller",
             "youbot_arm/joints_vel_controller",
-            "youbot_arm/joints_pos_controller"
+            "youbot_arm/joints_pos_controller",
+            "youbot_arm/gripper_pos_controller"
     };
     cmd_switcher_ = gen_switcher(controllers_name);
 
@@ -191,9 +197,9 @@ void YouBotArmHW::read(const ros::Time &time, const ros::Duration &period) {
 }
 
 void YouBotArmHW::write(const ros::Time &time, const ros::Duration &period) {
-    static std::vector<youbot::JointCurrentSetpoint> jointsCurren(ARMJOINTS);
-    static std::vector<youbot::JointVelocitySetpoint> jointsVelocity(ARMJOINTS);
-    static std::vector<youbot::JointAngleSetpoint> jointsAngle(ARMJOINTS);
+    std::vector<youbot::JointCurrentSetpoint> jointsCurren(ARMJOINTS);
+    std::vector<youbot::JointVelocitySetpoint> jointsVelocity(ARMJOINTS);
+    std::vector<youbot::JointAngleSetpoint> jointsAngle(ARMJOINTS);
     static youbot::GripperBarPositionSetPoint gripper1_pose;
     static youbot::GripperBarPositionSetPoint gripper2_pose;
 
@@ -211,7 +217,7 @@ void YouBotArmHW::write(const ros::Time &time, const ros::Duration &period) {
     }
     else if(cmd_switcher_.at("youbot_arm/joints_pos_controller")){
         for(int i = 0; i < ARMJOINTS; ++i){
-            jointsCurren.at(i).current = joints_cmd_.at(i).effort * ampere;
+            jointsAngle.at(i).angle = joints_cmd_.at(i).position * radian;
         }
         youBotManipulator->setJointData(jointsAngle);
     }

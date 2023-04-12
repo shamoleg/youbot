@@ -43,16 +43,12 @@ public:
 private:
     ros::NodeHandle nh;
     YouBotBaseHW youBotBaseHW;
-
-    InterfaceSwitcher cmd_switcher_;
+    YouBotArmHW youBotArmHW;
 
     hardware_interface::JointStateInterface hij_state_;
     hardware_interface::EffortJointInterface hij_effort_;
     hardware_interface::VelocityJointInterface hij_velocity_;
     hardware_interface::PositionJointInterface hij_position_;
-
-    std::vector<Joint> joints_sensed_;
-    std::vector<Joint> joints_cmd_;
 };
 
 
