@@ -151,7 +151,7 @@ bool YouBotArmHW::init(const ros::NodeHandle &root_nh, const ros::NodeHandle &ro
     youBotManipulator = std::make_unique<youbot::YouBotManipulator>(config_name, config_path);
     youBotManipulator->doJointCommutation();
 
-    std::vector<std::string> joints_names(ARMJOINTS);
+    std::vector<std::string> joints_names(ARMJOINTS + 2);
     std::vector<std::string> gripper_names(GRIPPERJOINTS);
     root_nh.param("arm_hardware_interface/joints", joints_names, joints_names);
     root_nh.param("arm_hardware_interface/gripper_names", gripper_names, gripper_names);
@@ -172,7 +172,22 @@ bool YouBotArmHW::init(const ros::NodeHandle &root_nh, const ros::NodeHandle &ro
 }
 
 void YouBotArmHW::read(const ros::Time &time, const ros::Duration &period) {
-    ElementHW::read(time, period);
+    static std::vector<youbot::JointSensedAngle> jointSensedAngle(ARMJOINTS);
+    static std::vector<youbot::JointSensedVelocity> jointSensedVelocity(ARMJOINTS);
+    static std::vector<youbot::JointSensedCurrent> jointSensedCurrent(ARMJOINTS);
+    static std::vector<youbot::JointSensedTorque> jointSensedTorque(ARMJOINTS);
+
+    youBotManipulator->getJointData(jointSensedAngle);
+    youBotManipulator->getJointData(jointSensedVelocity);
+    youBotManipulator->getJointData(jointSensedCurrent);
+    youBotManipulator->getJointData(jointSensedTorque);
+
+    for(int i = 0; i < ARMJOINTS; ++i){
+        joints_sensed_.at(i).position = jointSensedAngle.at(i).angle.value();
+        joints_sensed_.at(i).velocity = jointSensedVelocity.at(i).angularVelocity.value();
+        joints_sensed_.at(i).effort = jointSensedCurrent.at(i).current.value();
+        joints_sensed_.at(i).torque = jointSensedTorque.at(i).torque.value();
+    }
 }
 
 void YouBotArmHW::write(const ros::Time &time, const ros::Duration &period) {

@@ -5,10 +5,10 @@
 #ifndef SRC_YOUBOTELEMENTHW_H
 #define SRC_YOUBOTELEMENTHW_H
 
-#define ARMJOINTS 7
-#define GRIPPERJOINTS 2
-#define GRIPPERBAR1 5
-#define GRIPPERBAR2 6
+#define ARMJOINTS ((int)(5))
+#define GRIPPERJOINTS ((int)(2))
+#define GRIPPERBAR1 ((int)(5))
+#define GRIPPERBAR2 ((int)(6))
 
 
 #include "boost/thread.hpp"
